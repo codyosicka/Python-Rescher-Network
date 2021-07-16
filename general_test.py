@@ -11,13 +11,22 @@ import General
 #General.uploadto_equations_database(us_infl_rate)
 
 
-#connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-#table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
+connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
 #print(table)
+y = table.loc[table['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
+#.str.cat(table['x_variables'], sep=",")
+print(y)
+#print(General.sp.parsing.sympy_parser.parse_expr(table.loc[table['equation_name']=='quality']['equation'].values.tolist()[0]))
+#y_exp = General.sp.parsing.sympy_parser.parse_expr(y)
+#print(y)
+#print(y_exp.subs(list(y_exp.free_symbols)[0], 1))
+
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 
-x = General.complete_structures()
-print(x)
+#x = General.complete_structures()
+#print(x)
 
 #wheat_array = General.np.array([[1,1,1,0,0], [0,1,0,1,1], [1,0,0,0,0], [0,0,1,0,0], [0,0,0,0,1]])
 #wheat_df = General.pd.DataFrame(wheat_array, columns=['R', 'W', 'F', 'P', 'N'])

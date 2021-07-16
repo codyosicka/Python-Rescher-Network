@@ -33,6 +33,8 @@ from sympy import sympify
 from sympy import log, sin, cos, tan, Mul, Add, Max, Min, sqrt, Abs, exp
 from sympy import symbols
 
+from scipy.optimize import minimize
+
 import networkx as nx
 
 import mysql.connector
@@ -640,8 +642,25 @@ def simulator(equation_name, variables):
 
 
 
-def optimizer():
-  pass
+def optimizer(equation_name, objective, constraints, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
+  
+  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+
+  sql = "SELECT * FROM equations_table"
+  read_sql = pd.read_sql(sql, equations_conn)
+
+  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
+  selected_variables = read_sql.loc[read_sql['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
+
+
+  #x_str = 'X2/0.5*X10+2*X9-X1'
+  #x_exp = parse_expr(x_str)
+  #x_v = list(x_exp.free_symbols) # list({some expression}.free_symbols) yeilds a list of all variables in the equations in descending (by number) order
+  #print(x_exp)
+  #print(x_v)
+  #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
+
+
   return
 
 

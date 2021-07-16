@@ -651,11 +651,12 @@ def optimizer(equation_name, objective, constraints, initial_condition): # objec
 
   selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
   selected_variables = read_sql.loc[read_sql['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
-
+  expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
+  eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations in descending (by number) order
 
   #x_str = 'X2/0.5*X10+2*X9-X1'
   #x_exp = parse_expr(x_str)
-  #x_v = list(x_exp.free_symbols) # list({some expression}.free_symbols) yeilds a list of all variables in the equations in descending (by number) order
+  #x_v = list(x_exp.free_symbols) 
   #print(x_exp)
   #print(x_v)
   #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))

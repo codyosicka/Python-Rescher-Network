@@ -14,12 +14,14 @@ import General
 connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
 #print(table)
-y = table.loc[table['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
-#.str.cat(table['x_variables'], sep=",")
-print(y)
-#print(General.sp.parsing.sympy_parser.parse_expr(table.loc[table['equation_name']=='quality']['equation'].values.tolist()[0]))
-#y_exp = General.sp.parsing.sympy_parser.parse_expr(y)
-#print(y)
+
+y_eq = table.loc[table['equation_name']=='quality']['equation'].values.tolist()[0]
+y_v = table.loc[table['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
+print(y_eq)
+print(y_v)
+y_exp = General.sp.parsing.sympy_parser.parse_expr(y_eq)
+y_otherv = list(map(str, list(y_exp.free_symbols)))
+print(y_otherv)
 #print(y_exp.subs(list(y_exp.free_symbols)[0], 1))
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------

@@ -15,8 +15,8 @@ connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3
 table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
 #print(table)
 
-y_eq = table.loc[table['equation_name']=='quality']['equation'].values.tolist()[0]
-y_v = table.loc[table['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
+y_eq = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['equation'].values.tolist()[0]
+y_v = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['x_variables'].str.split(",").to_list()[0]
 print(y_eq)
 print(y_v)
 y_exp = General.sp.parsing.sympy_parser.parse_expr(y_eq)

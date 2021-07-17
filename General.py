@@ -637,12 +637,22 @@ def build_causal_network():
 
 
 def simulator(equation_name, variables):
+  
+  #x_str = 'X2/0.5*X10+2*X9-X1'
+  #x_exp = parse_expr(x_str)
+  #x_v = list(x_exp.free_symbols) 
+  #print(x_exp)
+  #print(x_v)
+  #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
+
   pass
   return
 
 
 
-def optimizer(equation_name, objective, constraints, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
+# on the website make each of the inputs for this optimizer function a menu of choices
+# Ex: objective: minimize or maximize; constraints: =, <, >, =<, >=, != (?); etc.
+def optimizer(equation_name, objective, constraints, bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 
@@ -652,14 +662,31 @@ def optimizer(equation_name, objective, constraints, initial_condition): # objec
   selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
   selected_variables = read_sql.loc[read_sql['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
   expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
-  eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations in descending (by number) order
+  eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations by order of which they appear in the equation
+  
+  eq_symbols_nums = []
+  for v in range(len(eq_symbols)):
+    eq_symbols_nums.append(eq_symbols[v].replace('X',''))
+    v+=1
+  eq_symbols_nums = list(map(int, eq_symbols_nums))
 
-  #x_str = 'X2/0.5*X10+2*X9-X1'
-  #x_exp = parse_expr(x_str)
-  #x_v = list(x_exp.free_symbols) 
-  #print(x_exp)
-  #print(x_v)
-  #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
+  eq_actual_variables = []
+  for n in eq_symbols_nums:
+    eq_actual_variables.append(selected_variables[n])
+
+
+  def f(x):
+    pass
+    return
+
+  #if objective == 'minimize':
+    #solution = minimize(selected_eq, initial_condition, method='SLSQP', bounds=bounds, constraints=constraints)
+  #elif objective == 'maximize':
+    #selected_eq = -selected_eq
+    #solution = minimize(selected_eq, initial_condition, method='SLSQP', bounds=bounds, constraints=constraints)
+
+  #y_sol = solution.fun
+  #xs_sol = solution.x
 
 
   return

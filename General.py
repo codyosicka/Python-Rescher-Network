@@ -636,7 +636,7 @@ def build_causal_network():
 
 
 
-def simulator(equation_name, variables):
+def simulator(equation_name, variable_values): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
   
   #x_str = 'X2/0.5*X10+2*X9-X1'
   #x_exp = parse_expr(x_str)
@@ -652,15 +652,16 @@ def simulator(equation_name, variables):
 
 # on the website make each of the inputs for this optimizer function a menu of choices
 # Ex: objective: minimize or maximize; constraints: =, <, >, =<, >=, != (?); etc.
-def optimizer(equation_name, objective, constraints, bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
+def optimizer(chosen_variable, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
-  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
-  selected_variables = read_sql.loc[read_sql['equation_name']=='quality']['x_variables'].str.split(",").to_list()[0]
+  # if chosen_variable is in read_sql 'equation' columns then...
+  selected_eq = read_sql.loc[read_sql['equation_name']==chosen_variable]['equation'].values.tolist()[0]
+  selected_variables = read_sql.loc[read_sql['equation_name']==chosen_variable]['x_variables'].str.split(",").to_list()[0]
   expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
   eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations by order of which they appear in the equation
   
@@ -669,21 +670,55 @@ def optimizer(equation_name, objective, constraints, bounds, initial_condition):
     eq_symbols_nums.append(eq_symbols[v].replace('X',''))
     v+=1
   eq_symbols_nums = list(map(int, eq_symbols_nums))
+  sorted_variables = eq_symbols_nums.sort()
+  sorted_variables = list(map(str, eq_symbols_nums))
+  sorted_variables = ["X" + sortv for sortv in sorted_variables]
 
   eq_actual_variables = []
-  for n in eq_symbols_nums:
+  for n in eq_symbols_nums.sort():
     eq_actual_variables.append(selected_variables[n])
 
 
-  def f(x):
-    pass
-    return
+  keys = sorted_variables
+  values = []
+  for s in range(len(sorted_variables)):
+    values.append('x[{}]'.format(s))
+    s+=1
 
-  #if objective == 'minimize':
-    #solution = minimize(selected_eq, initial_condition, method='SLSQP', bounds=bounds, constraints=constraints)
-  #elif objective == 'maximize':
-    #selected_eq = -selected_eq
-    #solution = minimize(selected_eq, initial_condition, method='SLSQP', bounds=bounds, constraints=constraints)
+  dict_of_xs = {keys[i]: values[i] for i in range(len(sorted_variables))}
+
+
+  def f(x):
+    list_to_execute = []
+    for key, value in dict_of_xs.items()
+      list_to_execute.append('{} = {}'.format(key, value))
+
+    for ex in list_to_execute:
+      exec(ex)
+
+    y = eval(selected_eq)
+
+    if objective == "minimize":
+      y = y
+    elif objective == "maximize":
+      y = -y
+
+    return y
+
+
+  # Initial Condition for the Function:
+  x_start = initial_condition
+
+
+  # Constraints of the the Function:
+  #cons = ({'type': 'eq', 'fun': lambda x: })
+
+
+  # Bounds of the Variables:
+  bnds = tuple(variable_bounds)
+
+
+  #solution = minimize(f, x_start, method='SLSQP', bounds=bnds, constraints=cons)
 
   #y_sol = solution.fun
   #xs_sol = solution.x

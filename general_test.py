@@ -17,14 +17,19 @@ table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
 
 y_eq = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['equation'].values.tolist()[0]
 y_v = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['x_variables'].str.split(",").to_list()[0]
-print(y_eq)
-print(y_v)
-y_exp = General.sp.parsing.sympy_parser.parse_expr(y_eq)
-y_otherv = list(map(str, list(y_exp.free_symbols)))
-print(y_otherv)
-#print(y_exp.subs(list(y_exp.free_symbols)[0], 1))
+
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+
+graph = General.nx.read_gexf('G_causal_network.gexf')
+#General.plt.figure(1)
+#General.nx.draw_planar(graph,
+#                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
+#                arrows=True, with_labels=True)
+#General.plt.show()
+
+print(graph.adj)
+print(len(graph.adj))
 
 
 #x = General.complete_structures()

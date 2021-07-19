@@ -635,9 +635,23 @@ def build_causal_network():
 #plt.show()
 
 
-
+# the simulator needs the User to choose an equation and input the values for its component variables
+# then, the simulator inputs the result into the equations that the chosen equation affects
+# then, the simulator needs to create static values for the effected equations to simulate the macro effects of the User input
 def simulator(equation_name, variable_values): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
   
+  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+
+  sql = "SELECT * FROM equations_table"
+  read_sql = pd.read_sql(sql, equations_conn)
+
+  whole_graph = nx.read_gexf('G_causal_network.gexf')
+  node_connections = whole_graph.adj
+
+  for node in range(len(node_connections)):
+    pass
+
+
   #x_str = 'X2/0.5*X10+2*X9-X1'
   #x_exp = parse_expr(x_str)
   #x_v = list(x_exp.free_symbols) 
@@ -652,16 +666,17 @@ def simulator(equation_name, variable_values): # User chooses equation_name from
 
 # on the website make each of the inputs for this optimizer function a menu of choices
 # Ex: objective: minimize or maximize; constraints: =, <, >, =<, >=, != (?); etc.
-def optimizer(chosen_variable, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
+def optimizer(chosen_variable, equation_name, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
-  # if chosen_variable is in read_sql 'equation' columns then...
-  selected_eq = read_sql.loc[read_sql['equation_name']==chosen_variable]['equation'].values.tolist()[0]
-  selected_variables = read_sql.loc[read_sql['equation_name']==chosen_variable]['x_variables'].str.split(",").to_list()[0]
+  # if chosen_variable is equal to equation_name then...
+  # if not, then...
+  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
+  selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
   expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
   eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations by order of which they appear in the equation
   
@@ -690,9 +705,8 @@ def optimizer(chosen_variable, objective, constraints, variable_bounds, initial_
 
   def f(x):
     list_to_execute = []
-    for key, value in dict_of_xs.items()
+    for key, value in dict_of_xs.items():
       list_to_execute.append('{} = {}'.format(key, value))
-
     for ex in list_to_execute:
       exec(ex)
 

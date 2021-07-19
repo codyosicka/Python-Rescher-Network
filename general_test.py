@@ -22,14 +22,15 @@ y_v = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['x_variable
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 graph = General.nx.read_gexf('G_causal_network.gexf')
-#General.plt.figure(1)
-#General.nx.draw_planar(graph,
-#                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
-#                arrows=True, with_labels=True)
-#General.plt.show()
 
 print(graph.adj)
 print(len(graph.adj))
+
+General.plt.figure(1)
+General.nx.draw_planar(graph,
+                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
+                arrows=True, with_labels=True)
+General.plt.show()
 
 
 #x = General.complete_structures()

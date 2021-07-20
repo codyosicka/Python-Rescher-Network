@@ -635,10 +635,9 @@ def build_causal_network():
 #plt.show()
 
 
-# the simulator needs the User to choose an equation and input the values for its component variables
-# then, the simulator inputs the result into the equations that the chosen equation affects
-# then, the simulator needs to create static values for the effected equations to simulate the macro effects of the User input
-def simulator(equation_name, variable_values): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
+# the simulator needs the User to choose an equation and input the values for its component variables and choose a target variable
+# then, the simulator needs to create static values for the effected equations to simulate the effects of the User inputs and assumptions on the target variable
+def simulator(equation_name, variable_values, target_variable): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 

@@ -13,28 +13,26 @@ import General
 
 connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
-#print(table)
-
-y_eq = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['equation'].values.tolist()[0]
-y_v = table.loc[table['equation_name']=='Shiller PE Ratio by Month']['x_variables'].str.split(",").to_list()[0]
+print(table)
 
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-graph = General.nx.read_gexf('G_causal_network.gexf')
+#graph = General.nx.read_gexf('G_causal_network.gexf')
 
-print(graph.adj)
-print(len(graph.adj))
+#print(graph.adj)
+#print(len(graph.adj))
 
-General.plt.figure(1)
-General.nx.draw_planar(graph,
-                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
-                arrows=True, with_labels=True)
-General.plt.show()
+#General.plt.figure(1)
+#General.nx.draw_planar(graph,
+#                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
+#                arrows=True, with_labels=True)
+#General.plt.show()
 
+#--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#x = General.complete_structures()
-#print(x)
+x = General.complete_structures()
+print(x)
 
 #wheat_array = General.np.array([[1,1,1,0,0], [0,1,0,1,1], [1,0,0,0,0], [0,0,1,0,0], [0,0,0,0,1]])
 #wheat_df = General.pd.DataFrame(wheat_array, columns=['R', 'W', 'F', 'P', 'N'])

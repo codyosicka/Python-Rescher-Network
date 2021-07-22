@@ -1,4 +1,4 @@
-import General 
+from General import General
 
 #shillerpe_regression = General.gp_symbolic_regression(data='shillerpe_regression_data_nodates.xlsx', data_type='xlsx', separator=',', y_variable='Shiller PE Ratio by Month')
 #wine_quality_regression = General.gp_symbolic_regression(data='winequality-red.csv', data_type='csv', separator=';', y_variable='quality')

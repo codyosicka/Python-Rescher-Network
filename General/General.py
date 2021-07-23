@@ -43,6 +43,7 @@ from databases import Database
 
 import fuzzywuzzy
 from fuzzywuzzy import fuzz, process
+import csv
 
 pd.set_option('display.max_columns', None)
 pd.set_option('display.max_rows', None)
@@ -52,7 +53,17 @@ pd.set_option('display.max_rows', None)
 
 # FINALIZED GP: SYMBOLIC REGRESSION:
 
-def gp_symbolic_regression(data, data_type, separator, y_variable):
+def gp_symbolic_regression(data, y_variable):
+
+  if 'csv' in data:
+    data_type = 'csv'
+    with open(data, newline='') as csvfile:
+      sniffer = csv.Sniffer()
+      dialect = sniffer.sniff(csvfile.read(1024))
+      spearator = dialect.delimiter
+  elif 'xlsx' in data:
+    data_type = 'xlsx'
+    separator = ''
 
   if data_type=='csv':
     df = pd.read_csv(data, sep=separator)

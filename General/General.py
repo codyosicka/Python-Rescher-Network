@@ -60,7 +60,7 @@ def gp_symbolic_regression(data, y_variable):
     with open(data, newline='') as csvfile:
       sniffer = csv.Sniffer()
       dialect = sniffer.sniff(csvfile.read(1024))
-      spearator = dialect.delimiter
+      separator = dialect.delimiter
   elif 'xlsx' in data:
     data_type = 'xlsx'
     separator = ''

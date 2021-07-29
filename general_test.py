@@ -5,6 +5,9 @@ from General import General
 #realestate_regression = General.gp_symbolic_regression('Realestate.csv','csv', ',', 'house price of unit area')
 #us_infl_rate = General.gp_symbolic_regression('m2-monthly-growth-vs-infl-nodates.xlsx','xlsx', ',', 'US Inflation Rate by Month')
 
+#shillerpe_regression = General.gp_symbolic_regression(data='shillerpe_regression_data_nodates.xlsx', y_variable='Shiller PE Ratio by Month')
+wine_quality_regression = General.gp_symbolic_regression(data='winequality-red.csv', y_variable='quality')
+
 #General.uploadto_equations_database(result_df = shillerpe_regression)
 #General.uploadto_equations_database(result_df = wine_quality_regression)
 #General.uploadto_equations_database(realestate_regression)

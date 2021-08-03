@@ -16,36 +16,7 @@ General.pd.set_option('display.max_rows', None)
 
 connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
-#print(table)
-
-all_variables_df = General.pd.DataFrame()
-all_variables_df['all_variables'] = table['equation_name'].str.cat(table['x_variables'], sep=",")
-
-all_variables_dict = {}
-for i in range(len(table)):
-	all_variables_dict[i] = table.loc[i]['x_variables'].split(",")
-	all_variables_dict[i].append(table.loc[i]['equation_name'])
-	i+=1
-all_variables_list = []
-for j in range(len(all_variables_dict)):
-	all_variables_list.append(all_variables_dict[j])
-	j+=1
-all_variables_list = [var for sublist in all_variables_list for var in sublist]
-
-
-def find_matches(variable):
-	matches = all_variables_df.apply(lambda row: (General.fuzz.partial_ratio(row['all_variables'], variable) == 100), axis=1)
-	return [k for k, x in enumerate(matches) if x]
-  
-for v_num in range(len(all_variables_list)):
-	matches_list = []
-	matches_list.append(find_matches(all_variables_list[v_num]))
-	v_num+=1
-
-matches_array = General.np.array(matches_list)
-matches_series = General.pd.Series(list(matches_array))
-
-print(all_variables_list)
+print(table)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -62,8 +33,8 @@ print(all_variables_list)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#x = General.complete_structures()
-#print(x)
+x = General.complete_structures()
+print(x)
 
 #wheat_array = General.np.array([[1,1,1,0,0], [0,1,0,1,1], [1,0,0,0,0], [0,0,1,0,0], [0,0,0,0,1]])
 #wheat_df = General.pd.DataFrame(wheat_array, columns=['R', 'W', 'F', 'P', 'N'])

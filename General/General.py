@@ -208,6 +208,9 @@ def uploadto_equations_database(result_df):
 
 
 def complete_structures():
+
+  # WILL HAVE TO FIX THE PROBLEM OF NOT ALL OF THE VARIABLES LISTED IN THE CSV AND EXCEL FILES WILL SHOW UP IN THE EQUATIONS
+  # SO IT DOES NOT MAKE SENSE THAT THE MISSING VARIABLES ARE INCLUDED IN THE complete_structures FUNCTIONS AND SHOW UP IN THE CAUSAL NETWORK AFTERWARDS
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 
@@ -215,7 +218,6 @@ def complete_structures():
   read_sql = pd.read_sql(sql, equations_conn)
 
   all_variables_df = pd.DataFrame()
-
   all_variables_df['all_variables'] = read_sql['equation_name'].str.cat(read_sql['x_variables'], sep=",")
 
   all_variables_dict = {}
@@ -229,17 +231,62 @@ def complete_structures():
     j+=1
   all_variables_list = [var for sublist in all_variables_list for var in sublist]
 
-  def find_matches(variable):
-    matches = all_variables_df.apply(lambda row: (fuzz.partial_ratio(row['all_variables'], variable) == 100), axis=1)
-    return [k for k, x in enumerate(matches) if x]
-  
-  for v_num in range(len(all_variables_list)):
-    matches_list = []
-    matches_list.append(find_matches(all_variables_list[v_num]))
-    v_num+=1
+  # remove duplicates from all_variables_list
+  seen = set()
+  result = []
+  for item in all_variables_list:
+    if item not in seen:
+      seen.add(item)
+      result.append(item)
+  all_variables_list = result
 
-  matches_array = np.array(matches_list)
-  matches_series = pd.Series(list(matches_array)) # this is a pandas Series of all the matches, indexed, so they may be accessed easily
+  series = all_variables_df['all_variables']
+  all_variables_series = series.str.split(pat=',')
+  all_variables_df_split = pd.DataFrame(item for item in all_variables_series)
+  all_df = pd.DataFrame(all_variables_list)
+
+  def find_matches(variable_name):
+    lst = []
+    for i in range(len(all_variables_df_split.index.values.tolist())):
+      if all_variables_df_split.loc[i].isin([variable_name]).any().any() == True:
+        lst.append(i)
+      i+=1
+    return lst
+
+  matches_list = []
+  for j in range(len(all_variables_list)):
+    matches_list.append(find_matches(all_variables_list[j]))
+    j+=1
+  all_df[1] = matches_list
+
+  matches_df = all_df[1]
+  for x in range(len(matches_df.index.values.tolist())):
+    if len(matches_df[x]) < 2:
+      matches_df = matches_df.drop(labels=[x])
+    x+=1
+
+  matches_series = matches_df.reset_index().drop(columns=['index'])[1]
+  matches_df = matches_series.to_frame()
+  matches_df = pd.DataFrame(np.unique(matches_df), columns=matches_df.columns) # remove duplicates
+  matches_df.columns = [0]
+  matches_series = matches_df[0] # this is a pandas Series of all the matches, indexed, so they may be accessed easily
+
+  list_of_matches = []
+  for i in range(len(matches_series)):
+    list_of_matches.append(matches_series[i])
+
+  transform0 = []
+  for i in list_of_matches:
+    transform0.append(set(i))
+
+  transform1 = []
+  for i in range(len(transform0)):
+    for j in range(i+1, len(transform0)):
+      i_set = transform0[i]
+      j_set = transform0[j]
+      if (i_set & j_set):
+        comb = list(set(list(i_set) + list(j_set)))
+        transform1.append(comb)
 
 
   # Now create the structures:
@@ -248,20 +295,23 @@ def complete_structures():
         # (b) In any subset of k function in which r (r >= k) variables appear, if the values of any (r-k) variables are chosen arbitrarily,
         # then the values of the remaining k variables are determined uniquely. (Finding these unique values is a matter of solving the equations for them.)
 
+  # preping the structures_dict to look like the 1s and 0s representation of structures
+
   structures_dict = {}
-  for match in range(len(matches_series)):
+  for match in range(len(transform1)):
     col_list = []
-    for eq in range(len(matches_series[match])):
-      structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=matches_series[match])
+    for eq in range(len(transform1[match])):
+      structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=transform1[match])
       structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=structures_dict[match].index).dropna(axis='columns', how='all')
-      structures_dict[match].index = list(range(len(matches_series[match])))
+      structures_dict[match].index = list(range(len(transform1[match])))
       col_list.append(structures_dict[match].loc[eq].dropna().values.tolist())
 
       eq+=1
     match+=1
   
-  col_list = [item for sublist in col_list for item in sublist]
-  for match in range(len(matches_series)):
+  col_list = [item for sublist in col_list for item in sublist] # flatten the list
+  col_list = list(set(col_list)) # remove duplicates
+  for match in range(len(transform1)):
     if len(col_list) > len(structures_dict[match].columns):
       for newcol in range(len(col_list) - len(structures_dict[match].columns)):
         structures_dict[match]["newcol{}".format(newcol)] = np.nan

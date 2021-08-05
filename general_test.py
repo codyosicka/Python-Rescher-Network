@@ -14,9 +14,9 @@ General.pd.set_option('display.max_rows', None)
 #General.uploadto_equations_database(us_infl_rate)
 
 
-connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
-print(table)
+#connection = General.create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+#table = General.pd.read_sql_query("SELECT * FROM equations_table", connection)
+#print(table)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

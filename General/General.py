@@ -247,7 +247,7 @@ def complete_structures():
   all_df = pd.DataFrame(all_variables_list)
 
   # Determine which variables appear in the equations
-  expression_series = sympify(table['equation'])
+  expression_series = sympify(read_sql['equation'])
   symbols_series = expression_series.apply(lambda x: list(x.free_symbols))
   symbols_series = symbols_series.apply(lambda x: list(map(str, x)))
   for x in range(len(symbols_series.index)):

@@ -217,6 +217,7 @@ def complete_structures():
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
+  # Select and organize all of the variables for each equation
   all_variables_df = pd.DataFrame()
   all_variables_df['all_variables'] = read_sql['equation_name'].str.cat(read_sql['x_variables'], sep=",")
 
@@ -245,10 +246,29 @@ def complete_structures():
   all_variables_df_split = pd.DataFrame(item for item in all_variables_series)
   all_df = pd.DataFrame(all_variables_list)
 
+  # Determine which variables appear in the equations
+  expression_series = sympify(table['equation'])
+  symbols_series = expression_series.apply(lambda x: list(x.free_symbols))
+  symbols_series = symbols_series.apply(lambda x: list(map(str, x)))
+  for x in range(len(symbols_series.index)):
+    for y in range(len(symbols_series[x])):
+      symbols_series[x][y] = symbols_series[x][y].replace('X','')
+  symbols_series = symbols_series.apply(lambda x: list(map(int, x)))
+  symbols_df = pd.DataFrame(item for item in symbols_series)
+
+  for column in range(len(symbols_df.columns)):
+    for index in range(len(symbols_df.index)):
+      if np.isnan(symbols_df[column].loc[index]):
+        continue
+      else:
+        symbols_df[column].loc[index] = all_variables_df_split[symbols_df[column].loc[index]].loc[index]
+
   def find_matches(variable_name):
     lst = []
-    for i in range(len(all_variables_df_split.index.values.tolist())):
-      if all_variables_df_split.loc[i].isin([variable_name]).any().any() == True:
+    #for i in range(len(all_variables_df_split.index.values.tolist())):
+    for i in range(len(symbols_df.index.values.tolist())):
+      #if all_variables_df_split.loc[i].isin([variable_name]).any().any() == True:
+      if symbols_df.loc[i].isin([variable_name]).any().any() == True:
         lst.append(i)
       i+=1
     return lst
@@ -288,7 +308,6 @@ def complete_structures():
         comb = list(set(list(i_set) + list(j_set)))
         transform1.append(comb)
 
-
   # Now create the structures:
   #   definition: A structure is a set of m functions involving n variables (where n >= m), such that:
         # (a) In any subset k function of the structure, at least k different variables appear.
@@ -298,14 +317,13 @@ def complete_structures():
   # preping the structures_dict to look like the 1s and 0s representation of structures
 
   structures_dict = {}
+  col_list = []
   for match in range(len(transform1)):
-    col_list = []
     for eq in range(len(transform1[match])):
       structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=transform1[match])
       structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=structures_dict[match].index).dropna(axis='columns', how='all')
       structures_dict[match].index = list(range(len(transform1[match])))
       col_list.append(structures_dict[match].loc[eq].dropna().values.tolist())
-
       eq+=1
     match+=1
   
@@ -316,13 +334,12 @@ def complete_structures():
       for newcol in range(len(col_list) - len(structures_dict[match].columns)):
         structures_dict[match]["newcol{}".format(newcol)] = np.nan
         newcol+=1
-
       structures_dict[match].columns = col_list
       structures_dict[match] = structures_dict[match].loc[:, ~structures_dict[match].columns.duplicated()]
     match+=1
 
+  check_list = []
   for key in range(len(structures_dict)):
-    check_list = []
     for index in range(len(structures_dict[key])):
       check_list.append(structures_dict[key].columns.isin(structures_dict[key].loc[index].values.tolist()) * 1.0)
       structures_dict[key].loc[index] = check_list[index]

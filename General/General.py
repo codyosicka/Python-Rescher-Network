@@ -208,9 +208,6 @@ def uploadto_equations_database(result_df):
 
 
 def complete_structures():
-
-  # WILL HAVE TO FIX THE PROBLEM OF NOT ALL OF THE VARIABLES LISTED IN THE CSV AND EXCEL FILES WILL SHOW UP IN THE EQUATIONS
-  # SO IT DOES NOT MAKE SENSE THAT THE MISSING VARIABLES ARE INCLUDED IN THE complete_structures FUNCTIONS AND SHOW UP IN THE CAUSAL NETWORK AFTERWARDS
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
 

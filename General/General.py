@@ -216,12 +216,11 @@ def complete_structures():
 
   # Select and organize all of the variables for each equation
   all_variables_df = pd.DataFrame()
-  all_variables_df['all_variables'] = read_sql['equation_name'].str.cat(read_sql['x_variables'], sep=",")
+  all_variables_df['all_variables'] = read_sql['x_variables']
 
   all_variables_dict = {}
   for i in range(len(read_sql)):
     all_variables_dict[i] = read_sql.loc[i]['x_variables'].split(",")
-    all_variables_dict[i].append(read_sql.loc[i]['equation_name'])
     i+=1
   all_variables_list = []
   for j in range(len(all_variables_dict)):
@@ -262,9 +261,7 @@ def complete_structures():
 
   def find_matches(variable_name):
     lst = []
-    #for i in range(len(all_variables_df_split.index.values.tolist())):
     for i in range(len(symbols_df.index.values.tolist())):
-      #if all_variables_df_split.loc[i].isin([variable_name]).any().any() == True:
       if symbols_df.loc[i].isin([variable_name]).any().any() == True:
         lst.append(i)
       i+=1
@@ -275,12 +272,7 @@ def complete_structures():
     matches_list.append(find_matches(all_variables_list[j]))
     j+=1
   all_df[1] = matches_list
-
   matches_df = all_df[1]
-  for x in range(len(matches_df.index.values.tolist())):
-    if len(matches_df[x]) < 2:
-      matches_df = matches_df.drop(labels=[x])
-    x+=1
 
   matches_series = matches_df.reset_index().drop(columns=['index'])[1]
   matches_df = matches_series.to_frame()
@@ -296,14 +288,26 @@ def complete_structures():
   for i in list_of_matches:
     transform0.append(set(i))
 
-  transform1 = []
-  for i in range(len(transform0)):
-    for j in range(i+1, len(transform0)):
-      i_set = transform0[i]
-      j_set = transform0[j]
-      if (i_set & j_set):
-        comb = list(set(list(i_set) + list(j_set)))
-        transform1.append(comb)
+l = transform0
+out = []
+while len(l)>0:
+    first, *rest = l
+    first = set(first)
+    lf = -1
+    while len(first)>lf:
+        lf = len(first)
+        rest2 = []
+        for r in rest:
+            if len(first.intersection(set(r)))>0:
+                first |= set(r)
+            else:
+                rest2.append(r)     
+        rest = rest2
+    out.append(first)
+    l = rest
+
+transform1 = out
+
 
   # Now create the structures:
   #   definition: A structure is a set of m functions involving n variables (where n >= m), such that:

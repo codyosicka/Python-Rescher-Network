@@ -185,7 +185,7 @@ def uploadto_equations_database(result_df):
   read_sql = pd.read_sql(sql, equations_conn)
 
 
-  if read_sql.isin([result_df['equation_name'][0]]).any().any():
+  if read_sql['equation_name'].isin([result_df['equation_name'][0]]).any().any():
 
     res1 = read_sql[read_sql['equation_name']==result_df['equation_name'][0]]
     previous_score = res1['score'].values[0]

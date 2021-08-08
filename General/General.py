@@ -288,25 +288,25 @@ def complete_structures():
   for i in list_of_matches:
     transform0.append(set(i))
 
-l = transform0
-out = []
-while len(l)>0:
-    first, *rest = l
-    first = set(first)
-    lf = -1
-    while len(first)>lf:
-        lf = len(first)
-        rest2 = []
-        for r in rest:
-            if len(first.intersection(set(r)))>0:
-                first |= set(r)
-            else:
-                rest2.append(r)     
-        rest = rest2
-    out.append(first)
-    l = rest
+  l = transform0
+  out = []
+  while len(l)>0:
+      first, *rest = l
+      first = set(first)
+      lf = -1
+      while len(first)>lf:
+          lf = len(first)
+          rest2 = []
+          for r in rest:
+              if len(first.intersection(set(r)))>0:
+                  first |= set(r)
+              else:
+                  rest2.append(r)     
+          rest = rest2
+      out.append(first)
+      l = rest
 
-transform1 = out
+  transform1 = out
 
 
   # Now create the structures:

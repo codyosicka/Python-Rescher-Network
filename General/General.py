@@ -206,7 +206,7 @@ def uploadto_equations_database(result_df):
   return
 
 
-
+# Define complete structures:
 def complete_structures():
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
@@ -306,10 +306,17 @@ def complete_structures():
                   rest2.append(r)     
           rest = rest2
       #out.append(first)
-      out.append(list(first))
+      out.append(list(first)) # list(first) turns the set 'first' into a list; 'first' is in numerical order least to greatest because sets order the numbers that way automatically
       l = rest
 
   transform1 = out # each number still represents the index of an equation from equations_database
+
+
+  structures_ys = []
+  for i in range(len(transform1)):
+    structures_ys.append([])
+    for j in range(len(transform1[i])):
+      structures_ys[i].append('f('+read_sql['equation_name'].loc[transform1[i][j]]+')')
 
 
   # Now create the structures:
@@ -350,6 +357,11 @@ def complete_structures():
       index+=1
     key+=1
 
+  # Step 1: create static structure and functions from given variables and functions
+
+  for key in range(len(structures_dict)): # re-index each dataframe in structures_dict
+    structures_dict[key].index = structures_ys[key] 
+
 
   return structures_dict
 
@@ -357,33 +369,11 @@ def complete_structures():
 
 # Apply Rescher Causal Ordering:
 
-# Define complete structures:
-
-
-def static_matrix_constructor(df): # need to modify this to incorporate it into model building
-
-  # Step 1: create static structure and functions from given variables and functions
-
-  # Requires that the structure is self-contained (number of functions = number of variables)
-
-  variables = df.columns.to_list()
-
-  j = 0
-  functions=[]
-  while j < len(variables):
-    functions.append('f'+'('+variables[j]+')')
-    j += 1
-
-  structure_matrix_array = df.to_numpy()
-  variables = np.array(variables)
-  functions = np.array(functions)
-
-  structure_matrix_df = pd.DataFrame(structure_matrix_array, index=functions, columns=variables)
-
-  return structure_matrix_df
-
 
 def static_self_contained_causal_structure(structure_matrix_df):
+  #NEED TO ADD REQUREMENT: (number of functions = number of variables)
+  # Requires that the structure is self-contained (number of functions = number of variables)
+
   # Now we reduce the matrix to determine causal ordering
 
   # Step 2: reduce the matrix by eliminating functions with only one variable (self-contained structures)

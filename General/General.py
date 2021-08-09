@@ -363,8 +363,11 @@ def complete_structures():
     structures_dict[key].index = structures_ys[key]
     structures_dict[key] = structures_dict[key].astype(int)
 
+  network_names = {}
+  for i in range(len(structures_ys)):
+    network_names[i] = '-'.join(structures_ys[i])
 
-  return structures_dict
+  return structures_dict, network_names
 
 
 
@@ -372,9 +375,6 @@ def complete_structures():
 
 
 def static_self_contained_causal_structure(structure_matrix_df):
-  #NEED TO ADD REQUREMENT: (number of functions = number of variables)
-  # Requires that the structure is self-contained (number of functions = number of variables)
-
   # Now we reduce the matrix to determine causal ordering
 
   # Step 2: reduce the matrix by eliminating functions with only one variable (self-contained structures)
@@ -549,8 +549,6 @@ def static_causal_order(original_df):
 
 
 # Initialize mini network:
-
-# initialize_causal_network should only be called once EVER and NEVER again
 def initialize_mini_network(original_df, sco, name_of_network): # name_of_network is string, # sco is the result from static_causal_order function
   
   for i in range(len(sco)):
@@ -592,7 +590,7 @@ def initialize_mini_network(original_df, sco, name_of_network): # name_of_networ
   for key in range(len(final_dict)):
     G_causal_variables.add_edges_from(final_dict[key]) # from file for large graphs
 
-  nx.write_gexf(G_causal_variables, "C:\\Users\\Xaos\\Desktop\\Python\\causal_networks_folder\\initialized_causal_network_{}.gexf".format(name_of_network))
+  nx.write_gexf(G_causal_variables, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\initialized_causal_network_{}.gexf".format(name_of_network))
 
   return G_causal_variables
 
@@ -645,7 +643,7 @@ def modify_mini_network(original_df, sco, previous_causal_network, name_of_netwo
   for key in range(len(final_dict)):
     G_causal_variables_new.add_edges_from(final_dict[key]) # from file for large graphs
 
-  nx.write_gexf(G_causal_variables_new, "C:\\Users\\Xaos\\Desktop\\Python\\causal_networks_folder\\modified_causal_network_{}.gexf".format(name_of_network))
+  nx.write_gexf(G_causal_variables_new, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\modified_causal_network_{}.gexf".format(name_of_network))
 
 
   return G_causal_variables_new

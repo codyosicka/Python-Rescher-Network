@@ -360,7 +360,8 @@ def complete_structures():
   # Step 1: create static structure and functions from given variables and functions
 
   for key in range(len(structures_dict)): # re-index each dataframe in structures_dict
-    structures_dict[key].index = structures_ys[key] 
+    structures_dict[key].index = structures_ys[key]
+    structures_dict[key] = structures_dict[key].astype(int)
 
 
   return structures_dict

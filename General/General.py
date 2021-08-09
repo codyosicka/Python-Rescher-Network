@@ -274,6 +274,8 @@ def complete_structures():
   all_df[1] = matches_list
   matches_df = all_df[1]
 
+  # the matches_df is a dataframe of groups of equations from the equations_database that contain a shared x_variable, indexed by all_variables_list
+
   matches_series = matches_df.reset_index().drop(columns=['index'])[1]
   matches_df = matches_series.to_frame()
   matches_df = pd.DataFrame(np.unique(matches_df), columns=matches_df.columns) # remove duplicates
@@ -303,10 +305,11 @@ def complete_structures():
               else:
                   rest2.append(r)     
           rest = rest2
-      out.append(first)
+      #out.append(first)
+      out.append(list(first))
       l = rest
 
-  transform1 = out
+  transform1 = out # each number still represents the index of an equation from equations_database
 
 
   # Now create the structures:

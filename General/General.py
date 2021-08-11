@@ -367,6 +367,8 @@ def complete_structures():
   for i in range(len(structures_ys)):
     network_names[i] = '-'.join(structures_ys[i])
 
+  equations_conn.dispose()
+
   return structures_dict, network_names
 
 
@@ -729,13 +731,15 @@ def simulator(equation_name, variable_values, target_variable): # User chooses e
   #print(x_v)
   #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
 
-  pass
+  equations_conn.dispose()
+
   return
 
 
 
 # on the website make each of the inputs for this optimizer function a menu of choices
 # Ex: objective: minimize or maximize; constraints: =, <, >, =<, >=, != (?); etc.
+# User may choose a variable from the selected equation, my function will rearrange the math to solve for that variable
 def optimizer(chosen_variable, equation_name, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
@@ -807,7 +811,8 @@ def optimizer(chosen_variable, equation_name, objective, constraints, variable_b
   #y_sol = solution.fun
   #xs_sol = solution.x
 
-
+  equations_conn.dispose()
+  
   return
 
 

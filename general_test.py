@@ -20,16 +20,16 @@ General.pd.set_option('display.max_rows', None)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#graph = General.nx.read_gexf('G_causal_network.gexf')
+graph = General.nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
 
-#print(graph.adj)
-#print(len(graph.adj))
+print(graph.adj)
+print(len(graph.adj))
 
-#General.plt.figure(1)
-#General.nx.draw_planar(graph,
-#                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
-#                arrows=True, with_labels=True)
-#General.plt.show()
+General.plt.figure(1)
+General.nx.draw_planar(graph,
+                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
+                arrows=True, with_labels=True)
+General.plt.show()
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 

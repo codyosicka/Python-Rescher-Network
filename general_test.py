@@ -33,8 +33,8 @@ General.pd.set_option('display.max_rows', None)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-x = General.complete_structures()
-print(x)
+#x = General.complete_structures()
+#print(x)
 
 #wheat_array = General.np.array([[1,1,1,0,0], [0,1,0,1,1], [1,0,0,0,0], [0,0,1,0,0], [0,0,0,0,1]])
 #wheat_df = General.pd.DataFrame(wheat_array, columns=['R', 'W', 'F', 'P', 'N'])
@@ -42,3 +42,8 @@ print(x)
 #wheat_structure_df = General.static_matrix_constructor(wheat_df)
 #print(wheat_structure_df)
 
+graph1 = General.nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\initialized_causal_network_f(BGMI)-f(Gold)-f(Silver)-f(XAU).gexf')
+
+General.plt.figure(1)
+General.nx.draw_planar(graph1, node_color='red', arrows=True, with_labels=True)
+General.plt.show()

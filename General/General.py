@@ -656,7 +656,7 @@ def modify_mini_network(original_df, sco, previous_causal_network, name_of_netwo
 def build_causal_network():
   
   #folder_path = r'C:\\Users\\Xaos\\Desktop\\Python\\causal_networks_folder'
-  folder_path = r'C:\\Users\\Buff14\\Desktop\\Python\\causal_networks_folder'
+  folder_path = r'C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks'
 
 
   def listDir(dir):
@@ -688,8 +688,8 @@ def build_causal_network():
   G_causal_network.add_nodes_from(causal_network_nodes_list)
   G_causal_network.add_edges_from(causal_network_edges_list)
 
-  #nx.write_gexf(G_causal_network, "C:\\Users\\Xaos\\Desktop\\Python\\G_causal_network.gexf")
-  nx.write_gexf(G_causal_network, "C:\\Users\\Buff14\\Desktop\\Python\\causal_networks_folder")
+  nx.write_gexf(G_causal_network, "C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf")
+  #nx.write_gexf(G_causal_network, "C:\\Users\\Buff14\\Desktop\\Python\\causal_networks_folder")
 
 
   return G_causal_network

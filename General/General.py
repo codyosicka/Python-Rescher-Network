@@ -88,6 +88,11 @@ def gp_symbolic_regression(data, y_variable):
   y_variable_stats_df = pd.concat([y_variable_stats_df, pd.DataFrame([scipy.stats.mode(y_variable_df)])], axis=1)
   y_variable_stats_df = y_variable_stats_df.explode('mode')
   y_variable_stats_df = y_variable_stats_df.explode('count')
+  y_variable_stats_df = y_variable_stats_df.astype(str)
+  y_variable_stats_df['minmax'] = y_variable_stats_df['minmax'].loc[0].replace('(','')
+  y_variable_stats_df['minmax'] = y_variable_stats_df['minmax'].loc[0].replace(')','')
+  y_variable_stats_df[['min', 'max']] = y_variable_stats_df['minmax'].str.split(",", expand=True)
+  y_variable_stats_df = y_variable_stats_df.drop(columns=['minmax'])
 
   x_stats_dict = {} # each key corresponds to the index of the x_variables in the equations_table
   for col in range(len(x_variables_df.columns.values.tolist())):
@@ -98,6 +103,11 @@ def gp_symbolic_regression(data, y_variable):
     x_stats_dict[col] = pd.concat([x_stats_dict[col], pd.DataFrame([scipy.stats.mode(x_variables_df[x_variables_df.columns.values.tolist()[col]])])], axis=1)
     x_stats_dict[col] = x_stats_dict[col].explode('mode')
     x_stats_dict[col] = x_stats_dict[col].explode('count')
+    x_stats_dict[col] = x_stats_dict[col].astype(str)
+    x_stats_dict[col]['minmax'] = x_stats_dict[col]['minmax'].loc[0].replace('(','')
+    x_stats_dict[col]['minmax'] = x_stats_dict[col]['minmax'].loc[0].replace(')','')
+    x_stats_dict[col][['min', 'max']] = x_stats_dict[col]['minmax'].str.split(",", expand=True)
+    x_stats_dict[col] = x_stats_dict[col].drop(columns=['minmax'])
 
   # when doing the x_variables stats, make sure that the scipy.stats.describe and other functions are taking in a pandas.series
 

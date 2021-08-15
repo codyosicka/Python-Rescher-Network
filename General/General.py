@@ -93,6 +93,7 @@ def gp_symbolic_regression(data, y_variable):
   y_variable_stats_df['minmax'] = y_variable_stats_df['minmax'].loc[0].replace(')','')
   y_variable_stats_df[['min', 'max']] = y_variable_stats_df['minmax'].str.split(",", expand=True)
   y_variable_stats_df = y_variable_stats_df.drop(columns=['minmax'])
+  y_variable_stats_df = y_variable_stats_df.add_prefix('y_')
 
   x_stats_dict = {} # each key corresponds to the index of the x_variables in the equations_table
   for col in range(len(x_variables_df.columns.values.tolist())):
@@ -112,6 +113,7 @@ def gp_symbolic_regression(data, y_variable):
   final_stats_df = x_stats_dict[0]
   for df in range(1, len(x_stats_dict)):
     final_stats_df = final_stats_df + ',' + x_stats_dict[df]
+  final_stats_df = final_stats_df.add_prefix('xs_')
 
   number_of_variables = len(x_variables_df.columns)
   x_variables_list = x_variables_df.columns.values.tolist()
@@ -200,12 +202,9 @@ def gp_symbolic_regression(data, y_variable):
   x_variables_str_df = pd.DataFrame(data=[x_variables_str], dtype='string')
   name_df = pd.DataFrame(data=[y_variable], columns=['equation_name'], dtype='string')
   score_df = pd.DataFrame(data=[score_gp], columns=['score'], dtype='float')
-  result_df = pd.concat([name_df, equation_df, score_df, x_variables_str_df], axis=1)
-  result_df.columns = ['equation_name', 'equation', 'score', 'x_variables']
-
-
-
-
+  result_df = pd.concat([name_df, equation_df, score_df, x_variables_str_df, y_variable_stats_df, final_stats_df], axis=1)
+  result_df.columns = ['equation_name', 'equation', 'score', 'x_variables', 'y_nobs', 'y_mean', 'y_variance', 'y_skewness', 'y_kurtosis', 'y_iqr', 'y_median', 'y_mode', 
+                      'y_count', 'y_min', 'y_max', 'xs_nobs', 'xs_mean', 'xs_variance', 'xs_skewness', 'xs_kurtosis', 'xs_iqr', 'xs_median', 'xs_mode', 'xs_count', 'xs_min', 'xs_max']
 
   return result_df#, score_gp, score_tree, score_rf
 

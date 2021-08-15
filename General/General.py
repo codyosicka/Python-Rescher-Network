@@ -109,7 +109,9 @@ def gp_symbolic_regression(data, y_variable):
     x_stats_dict[col][['min', 'max']] = x_stats_dict[col]['minmax'].str.split(",", expand=True)
     x_stats_dict[col] = x_stats_dict[col].drop(columns=['minmax'])
 
-  # when doing the x_variables stats, make sure that the scipy.stats.describe and other functions are taking in a pandas.series
+  final_stats_df = x_stats_dict[0]
+  for df in range(1, len(x_stats_dict)):
+    final_stats_df = final_stats_df + ',' + x_stats_dict[df]
 
   number_of_variables = len(x_variables_df.columns)
   x_variables_list = x_variables_df.columns.values.tolist()

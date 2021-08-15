@@ -33,6 +33,9 @@ from sympy import sympify
 from sympy import log, sin, cos, tan, Mul, Add, Max, Min, sqrt, Abs, exp
 from sympy import symbols
 
+import scipy
+from scipy import stats
+from scipy import ndimage
 from scipy.optimize import minimize
 
 import networkx as nx
@@ -74,8 +77,30 @@ def gp_symbolic_regression(data, y_variable):
     df = df.dropna(how = 'any')
     df = df.astype(float)
 
-  y_variable_df = df[y_variable] 
+  y_variable_df = df[y_variable]
   x_variables_df = df.drop(columns=y_variable)
+
+
+  y_variable_stats = scipy.stats.describe(y_variable_df)
+  y_variable_stats_df = pd.DataFrame([y_variable_stats], columns=y_variable_stats._fields)
+  y_variable_stats_df['iqr'] = scipy.stats.iqr(y_variable_df)
+  y_variable_stats_df['median'] = scipy.ndimage.median(y_variable_df)
+  y_variable_stats_df = pd.concat([y_variable_stats_df, pd.DataFrame([scipy.stats.mode(y_variable_df)])], axis=1)
+  y_variable_stats_df = y_variable_stats_df.explode('mode')
+  y_variable_stats_df = y_variable_stats_df.explode('count')
+
+  x_stats_dict = {} # each key corresponds to the index of the x_variables in the equations_table
+  for col in range(len(x_variables_df.columns.values.tolist())):
+    x_stats_dict[col] = pd.DataFrame([scipy.stats.describe(x_variables_df[x_variables_df.columns.values.tolist()[col]])], 
+                                      columns=scipy.stats.describe(x_variables_df[x_variables_df.columns.values.tolist()[col]])._fields)
+    x_stats_dict[col]['iqr'] = scipy.stats.iqr(x_variables_df[x_variables_df.columns.values.tolist()[col]])
+    x_stats_dict[col]['median'] = scipy.ndimage.median(x_variables_df[x_variables_df.columns.values.tolist()[col]])
+    x_stats_dict[col] = pd.concat([x_stats_dict[col], pd.DataFrame([scipy.stats.mode(x_variables_df[x_variables_df.columns.values.tolist()[col]])])], axis=1)
+    x_stats_dict[col] = x_stats_dict[col].explode('mode')
+    x_stats_dict[col] = x_stats_dict[col].explode('count')
+
+  # when doing the x_variables stats, make sure that the scipy.stats.describe and other functions are taking in a pandas.series
+
   number_of_variables = len(x_variables_df.columns)
   x_variables_list = x_variables_df.columns.values.tolist()
   x_variables_str = ','.join(x_variables_list)
@@ -158,7 +183,6 @@ def gp_symbolic_regression(data, y_variable):
     'exp': exp
     }
   equation_string = sympify(equation_to_string, locals=locals)
-  #equation_string = sympify(equation_string, symbols_)
   equation_df = pd.DataFrame(data=[equation_string], dtype='string')
 
   x_variables_str_df = pd.DataFrame(data=[x_variables_str], dtype='string')
@@ -166,6 +190,10 @@ def gp_symbolic_regression(data, y_variable):
   score_df = pd.DataFrame(data=[score_gp], columns=['score'], dtype='float')
   result_df = pd.concat([name_df, equation_df, score_df, x_variables_str_df], axis=1)
   result_df.columns = ['equation_name', 'equation', 'score', 'x_variables']
+
+
+
+
 
   return result_df#, score_gp, score_tree, score_rf
 

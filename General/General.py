@@ -779,12 +779,13 @@ def simulator(equation_name, variable_values, target_variable): # User chooses e
 # on the website make each of the inputs for this optimizer function a menu of choices
 # Ex: objective: minimize or maximize; constraints: =, <, >, =<, >=, != (?); etc.
 # User may choose a variable from the selected equation, my function will rearrange the math to solve for that variable
-def optimizer(chosen_variable, equation_name, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
-  
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+#def user_optimizer(chosen_variable, equation_name, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
+ 
+def user_optimizer(chosen_variable, equation_name, objective):
 
-  sql = "SELECT * FROM equations_table"
-  read_sql = pd.read_sql(sql, equations_conn)
+  #equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  #sql = "SELECT * FROM equations_table"
+  #read_sql = pd.read_sql(sql, equations_conn)
 
   # if chosen_variable is equal to equation_name then...
   # if not, then...
@@ -824,6 +825,7 @@ def optimizer(chosen_variable, equation_name, objective, constraints, variable_b
       exec(ex)
 
     y = eval(selected_eq)
+    eqn = 
 
     if objective == "minimize":
       y = y
@@ -850,7 +852,7 @@ def optimizer(chosen_variable, equation_name, objective, constraints, variable_b
   #y_sol = solution.fun
   #xs_sol = solution.x
 
-  equations_conn.dispose()
+  #equations_conn.dispose()
   
   return
 

@@ -189,7 +189,7 @@ def gp_symbolic_regression(data, y_variable):
     'sqrt': sqrt,
     'max': Max,
     'min': Min,
-    'abs': Abs,
+    #'abs': Abs,
     #'inv': invert,
     'tan': tan,
     'neg': lambda x    : -x,
@@ -781,14 +781,12 @@ def simulator(equation_name, variable_values, target_variable): # User chooses e
 # User may choose a variable from the selected equation, my function will rearrange the math to solve for that variable
 #def user_optimizer(chosen_variable, equation_name, objective, constraints, variable_bounds, initial_condition): # objective is either min or max; constraints is a list; initial condition is a guess for values of variables
  
-def user_optimizer(chosen_variable, equation_name, objective):
+def self_optimizer(equation_name, objective):
 
   #equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
   #sql = "SELECT * FROM equations_table"
   #read_sql = pd.read_sql(sql, equations_conn)
 
-  # if chosen_variable is equal to equation_name then...
-  # if not, then...
   selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
   selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
   expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
@@ -807,7 +805,6 @@ def user_optimizer(chosen_variable, equation_name, objective):
   for n in eq_symbols_nums.sort():
     eq_actual_variables.append(selected_variables[n])
 
-
   keys = sorted_variables
   values = []
   for s in range(len(sorted_variables)):
@@ -825,7 +822,6 @@ def user_optimizer(chosen_variable, equation_name, objective):
       exec(ex)
 
     y = eval(selected_eq)
-    eqn = 
 
     if objective == "minimize":
       y = y
@@ -855,6 +851,36 @@ def user_optimizer(chosen_variable, equation_name, objective):
   #equations_conn.dispose()
   
   return
+
+
+
+def variable_optimizer(chosen_variable, equation_name, objective):
+
+  #equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  #sql = "SELECT * FROM equations_table"
+  #read_sql = pd.read_sql(sql, equations_conn)
+
+  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
+  selected_y = read_sql.loc[read_sql['equation_name']==equation_name]['equation_name'].values.tolist()[0]
+  full_eq = selected_eq + ' - ' + selected_y # for sympy the equation must be in the form: 0 = x0 * x1 +...+ - y
+  full_expression = sympy.parsing.sympy_parser.parse_expr(full_eq)
+  sympy_variables = list(map(str, list(full_expression.free_symbols)))
+  sympy_variables_for_eq = ','.join(sympy_variables)
+  var(sympy_variables, real=True)
+  selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
+  selected_var_index = selected_variables.index(chosen_variable)
+  selected_var_x = 'X' + str(selected_var_index)
+  target_equation = str(solve(full_eq, selected_var_x)[0]) # here the chosen_variable is now on the left side of the eqn
+
+  #expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
+  #eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations by order of which they appear in the equation
+  #eq_symbols.append(selected_y)
+  #eq_variables = ','.join(eq_symbols)
+  #eq_variables = var(eq_variables)
+
+  
+  return
+
 
 
 

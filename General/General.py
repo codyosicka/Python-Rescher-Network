@@ -796,8 +796,8 @@ def self_optimizer(equation_name, objective):
   for v in range(len(eq_symbols)):
     eq_symbols_nums.append(eq_symbols[v].replace('X',''))
     v+=1
-  eq_symbols_nums = list(map(int, eq_symbols_nums))
-  sorted_variables = eq_symbols_nums.sort()
+  eq_symbols_nums = list(set(map(int, eq_symbols_nums)))
+  sorted_variables = eq_symbols_nums
   sorted_variables = list(map(str, eq_symbols_nums))
   sorted_variables = ["X" + sortv for sortv in sorted_variables]
 
@@ -823,34 +823,52 @@ def self_optimizer(equation_name, objective):
 
     y = eval(selected_eq)
 
-    if objective == "minimize":
+    if objective == "Minimize":
       y = y
-    elif objective == "maximize":
+    elif objective == "Maximize":
       y = -y
 
     return y
 
 
-  # Initial Condition for the Function:
-  x_start = initial_condition
+  selected_variable_means = table.loc[table['equation_name']=='BGMI']['xs_mean'].str.split(',').to_list()[0]
+  selected_variable_maxs = table.loc[table['equation_name']=='BGMI']['xs_max'].str.split(',').to_list()[0]
+  selected_variable_mins = table.loc[table['equation_name']=='BGMI']['xs_min'].str.split(',').to_list()[0]
 
+  key_stats = []
+  for v in selected_variables:
+    key_stats.append('X'+str(selected_variables.index(v)))
 
-  # Constraints of the the Function:
-  #cons = ({'type': 'eq', 'fun': lambda x: })
+  value_means = []
+  value_maxs = []
+  value_mins = []
+  for m in range(len(selected_variable_means)):
+    value_means.append(selected_variable_means[m])
+    value_maxs.append(selected_variable_maxs[m])
+    value_mins.append(selected_variable_mins[m])
+  value_means = [float(i) for i in value_means]
+  value_maxs = [float(i) for i in value_maxs]
+  value_mins = [float(i) for i in value_mins]
 
+  dict_of_means = {key_stats[i]: value_means[i] for i in range(len(key_stats))}
+  dict_of_maxs = {key_stats[i]: value_maxs[i] for i in range(len(key_stats))}
+  dict_of_mins = {key_stats[i]: value_mins[i] for i in range(len(key_stats))}
 
-  # Bounds of the Variables:
-  bnds = tuple(variable_bounds)
+  list_of_bnds = []
+  initial_condition = []
+  for k in dict_of_xs:
+    initial_condition.append(dict_of_means[k])
+    list_of_bnds.append((dict_of_mins[k], dict_of_maxs[k]))
+  bnds = tuple(list_of_bnds)
 
+  optimized_result = scipy.optimize.minimize(fun=f, x0=initial_condition, method='SLSQP', bounds=bnds)
+  xs_result = {keys[i]: list(optimized_result.x)[i] for i in range(len(keys))}
+  y_result = optimized_result.fun
 
-  #solution = minimize(f, x_start, method='SLSQP', bounds=bnds, constraints=cons)
-
-  #y_sol = solution.fun
-  #xs_sol = solution.x
 
   #equations_conn.dispose()
   
-  return
+  return {'xs_result': xs_result, 'y_result': y_result}
 
 
 
@@ -860,26 +878,95 @@ def variable_optimizer(chosen_variable, equation_name, objective):
   #sql = "SELECT * FROM equations_table"
   #read_sql = pd.read_sql(sql, equations_conn)
 
-  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
-  selected_y = read_sql.loc[read_sql['equation_name']==equation_name]['equation_name'].values.tolist()[0]
+  selected_eq = table.loc[table['equation_name']==equation_name]['equation'].values.tolist()[0]
+  selected_y = table.loc[table['equation_name']==equation_name]['equation_name'].values.tolist()[0]
   full_eq = selected_eq + ' - ' + selected_y # for sympy the equation must be in the form: 0 = x0 * x1 +...+ - y
   full_expression = sympy.parsing.sympy_parser.parse_expr(full_eq)
   sympy_variables = list(map(str, list(full_expression.free_symbols)))
   sympy_variables_for_eq = ','.join(sympy_variables)
   var(sympy_variables, real=True)
-  selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
+  selected_variables = table.loc[table['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
   selected_var_index = selected_variables.index(chosen_variable)
   selected_var_x = 'X' + str(selected_var_index)
   target_equation = str(solve(full_eq, selected_var_x)[0]) # here the chosen_variable is now on the left side of the eqn
 
-  #expression = sp.parsing.sympy_parser.parse_expr(selected_eq)
-  #eq_symbols = list(map(str, list(expression.free_symbols))) # list({some expression}.free_symbols) yeilds a list of all variables in the equations by order of which they appear in the equation
-  #eq_symbols.append(selected_y)
-  #eq_variables = ','.join(eq_symbols)
-  #eq_variables = var(eq_variables)
+  new_expression = sympy.parsing.sympy_parser.parse_expr(target_equation)
+  new_symbols = list(set(list(map(str, list(new_expression.free_symbols)))))
 
-  
-  return
+  keys = new_symbols
+  values = []
+  for s in range(len(new_symbols)):
+    values.append('x[{}]'.format(s))
+
+  dict_of_xs = {keys[i]: values[i] for i in range(len(new_symbols))}
+
+
+  def f(x):
+    list_to_execute = []
+    for key, value in dict_of_xs.items():
+      list_to_execute.append('{} = {}'.format(key, value))
+    for ex in list_to_execute:
+      exec(ex)
+
+    y = eval(target_equation)
+
+    if objective == "Minimize":
+      y = y
+    elif objective == "Maximize":
+      y = -y
+
+    return y
+
+  selected_var_index = selected_variables.index(chosen_variable)
+  selected_var_x = 'X' + str(selected_var_index)
+
+  selected_variable_means = table.loc[table['equation_name']==equation_name]['xs_mean'].str.split(',').to_list()[0]
+  selected_variable_maxs = table.loc[table['equation_name']==equation_name]['xs_max'].str.split(',').to_list()[0]
+  selected_variable_mins = table.loc[table['equation_name']==equation_name]['xs_min'].str.split(',').to_list()[0]
+
+  key_stats = []
+  for v in selected_variables:
+    key_stats.append('X'+str(selected_variables.index(v)))
+  key_stats.append(selected_y)
+
+  value_means = []
+  value_maxs = []
+  value_mins = []
+  for m in range(len(selected_variable_means)):
+    value_means.append(selected_variable_means[m])
+    value_maxs.append(selected_variable_maxs[m])
+    value_mins.append(selected_variable_mins[m])
+  value_means.append(table.loc[table['equation_name']==equation_name]['y_mean'].values.tolist()[0])
+  value_maxs.append(table.loc[table['equation_name']==equation_name]['y_max'].values.tolist()[0])
+  value_mins.append(table.loc[table['equation_name']==equation_name]['y_min'].values.tolist()[0])
+  value_means = [float(i) for i in value_means]
+  value_maxs = [float(i) for i in value_maxs]
+  value_mins = [float(i) for i in value_mins]
+
+  dict_of_means = {key_stats[i]: value_means[i] for i in range(len(key_stats))}
+  dict_of_maxs = {key_stats[i]: value_maxs[i] for i in range(len(key_stats))}
+  dict_of_mins = {key_stats[i]: value_mins[i] for i in range(len(key_stats))}
+  for k in key_stats:
+    if k not in new_symbols:
+      dict_of_means.pop(k)
+      dict_of_maxs.pop(k)
+      dict_of_mins.pop(k)
+
+
+  list_of_bnds = []
+  initial_condition = []
+  for k in dict_of_xs:
+    initial_condition.append(dict_of_means[k])
+    list_of_bnds.append((dict_of_mins[k], dict_of_maxs[k]))
+  bnds = tuple(list_of_bnds)
+
+
+  optimize_result = scipy.optimize.minimize(fun=f, x0=initial_condition, bounds=bnds)
+  xs_result = {keys[i]: list(optimized_result.x)[i] for i in range(len(keys))}
+  y_result = optimize_result.fun
+
+
+  return {'xs_result': xs_result, 'y_result': y_result}
 
 
 

@@ -143,7 +143,7 @@ def gp_symbolic_regression(data, y_variable):
                             p_hoist_mutation=0.05, #0.05, The probability of performing hoist mutation on a tournament winner. Hoist mutation takes the winner of a tournament and selects a random subtree from it. A random subtree of that subtree is then selected and this is ‘hoisted’ into the original subtrees location to form an offspring in the next generation. This method helps to control bloat.
                             p_point_mutation=0.1,
                             max_samples=0.9, verbose=1,
-                            parsimony_coefficient=0.01, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg','inv'), 
+                            parsimony_coefficient=0.5, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg','inv'), 
                             warm_start=False, tournament_size=20)
   est_gp.fit(X_train, y_train)
 

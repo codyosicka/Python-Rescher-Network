@@ -143,7 +143,7 @@ def gp_symbolic_regression(data, y_variable):
                             p_hoist_mutation=0.05, #0.05, The probability of performing hoist mutation on a tournament winner. Hoist mutation takes the winner of a tournament and selects a random subtree from it. A random subtree of that subtree is then selected and this is ‘hoisted’ into the original subtrees location to form an offspring in the next generation. This method helps to control bloat.
                             p_point_mutation=0.1,
                             max_samples=0.9, verbose=1,
-                            parsimony_coefficient=0.5, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg'), 
+                            parsimony_coefficient=0.2, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg'), 
                             warm_start=False, tournament_size=20)
   est_gp.fit(X_train, y_train)
 
@@ -748,7 +748,7 @@ def build_causal_network():
 
 
 # the simulator needs the User to choose an equation and input the values for its component variables and choose a target variable
-# then, the simulator needs to create static values for the effected equations to simulate the effects of the User inputs and assumptions on the target variable
+# then, the simulator needs to create static values for the affected equations to simulate the effects of the User inputs and assumptions on the target variable
 def simulator(equation_name, variable_values, target_variable): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")

@@ -831,9 +831,9 @@ def self_optimizer(equation_name, objective):
     return y
 
 
-  selected_variable_means = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_mean'].str.split(',').to_list()[0]
-  selected_variable_maxs = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_max'].str.split(',').to_list()[0]
-  selected_variable_mins = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_min'].str.split(',').to_list()[0]
+  selected_variable_means = read_sql.loc[read_sql['equation_name']==equation_name]['xs_mean'].str.split(',').to_list()[0]
+  selected_variable_maxs = read_sql.loc[read_sql['equation_name']==equation_name]['xs_max'].str.split(',').to_list()[0]
+  selected_variable_mins = read_sql.loc[read_sql['equation_name']==equation_name]['xs_min'].str.split(',').to_list()[0]
 
   key_stats = []
   for v in selected_variables:

@@ -143,7 +143,7 @@ def gp_symbolic_regression(data, y_variable):
                             p_hoist_mutation=0.05, #0.05, The probability of performing hoist mutation on a tournament winner. Hoist mutation takes the winner of a tournament and selects a random subtree from it. A random subtree of that subtree is then selected and this is ‘hoisted’ into the original subtrees location to form an offspring in the next generation. This method helps to control bloat.
                             p_point_mutation=0.1,
                             max_samples=0.9, verbose=1,
-                            parsimony_coefficient=0.5, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg','inv'), 
+                            parsimony_coefficient=0.5, random_state=0, function_set=('add','sub','mul','div','log','sqrt','sin','cos','max','min','tan','neg'), 
                             warm_start=False, tournament_size=20)
   est_gp.fit(X_train, y_train)
 
@@ -783,9 +783,9 @@ def simulator(equation_name, variable_values, target_variable): # User chooses e
  
 def self_optimizer(equation_name, objective):
 
-  #equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-  #sql = "SELECT * FROM equations_table"
-  #read_sql = pd.read_sql(sql, equations_conn)
+  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  sql = "SELECT * FROM equations_table"
+  read_sql = pd.read_sql(sql, equations_conn)
 
   selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
   selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
@@ -802,7 +802,7 @@ def self_optimizer(equation_name, objective):
   sorted_variables = ["X" + sortv for sortv in sorted_variables]
 
   eq_actual_variables = []
-  for n in eq_symbols_nums.sort():
+  for n in eq_symbols_nums:
     eq_actual_variables.append(selected_variables[n])
 
   keys = sorted_variables
@@ -831,9 +831,9 @@ def self_optimizer(equation_name, objective):
     return y
 
 
-  selected_variable_means = table.loc[table['equation_name']=='BGMI']['xs_mean'].str.split(',').to_list()[0]
-  selected_variable_maxs = table.loc[table['equation_name']=='BGMI']['xs_max'].str.split(',').to_list()[0]
-  selected_variable_mins = table.loc[table['equation_name']=='BGMI']['xs_min'].str.split(',').to_list()[0]
+  selected_variable_means = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_mean'].str.split(',').to_list()[0]
+  selected_variable_maxs = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_max'].str.split(',').to_list()[0]
+  selected_variable_mins = read_sql.loc[read_sql['equation_name']=='BGMI']['xs_min'].str.split(',').to_list()[0]
 
   key_stats = []
   for v in selected_variables:
@@ -866,7 +866,7 @@ def self_optimizer(equation_name, objective):
   y_result = optimized_result.fun
 
 
-  #equations_conn.dispose()
+  equations_conn.dispose()
   
   return {'xs_result': xs_result, 'y_result': y_result}
 
@@ -874,23 +874,23 @@ def self_optimizer(equation_name, objective):
 
 def variable_optimizer(chosen_variable, equation_name, objective):
 
-  #equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-  #sql = "SELECT * FROM equations_table"
-  #read_sql = pd.read_sql(sql, equations_conn)
+  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  sql = "SELECT * FROM equations_table"
+  read_sql = pd.read_sql(sql, equations_conn)
 
   selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
   selected_y = read_sql.loc[read_sql['equation_name']==equation_name]['equation_name'].values.tolist()[0]
   full_eq = selected_eq + ' - ' + selected_y # for sympy the equation must be in the form: 0 = x0 * x1 +...+ - y
-  full_expression = sympy.parsing.sympy_parser.parse_expr(full_eq)
+  full_expression = sp.parsing.sympy_parser.parse_expr(full_eq)
   sympy_variables = list(map(str, list(full_expression.free_symbols)))
   sympy_variables_for_eq = ','.join(sympy_variables)
-  var(sympy_variables, real=True)
+  sp.var(sympy_variables, real=True)
   selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
   selected_var_index = selected_variables.index(chosen_variable)
   selected_var_x = 'X' + str(selected_var_index)
-  target_equation = str(solve(full_eq, selected_var_x)[0]) # here the chosen_variable is now on the left side of the eqn
+  target_equation = str(sp.solve(full_eq, selected_var_x)[0]) # here the chosen_variable is now on the left side of the eqn
 
-  new_expression = sympy.parsing.sympy_parser.parse_expr(target_equation)
+  new_expression = sp.parsing.sympy_parser.parse_expr(target_equation)
   new_symbols = list(set(list(map(str, list(new_expression.free_symbols)))))
 
   keys = new_symbols
@@ -920,9 +920,9 @@ def variable_optimizer(chosen_variable, equation_name, objective):
   selected_var_index = selected_variables.index(chosen_variable)
   selected_var_x = 'X' + str(selected_var_index)
 
-  selected_variable_means = table.loc[table['equation_name']==equation_name]['xs_mean'].str.split(',').to_list()[0]
-  selected_variable_maxs = table.loc[table['equation_name']==equation_name]['xs_max'].str.split(',').to_list()[0]
-  selected_variable_mins = table.loc[table['equation_name']==equation_name]['xs_min'].str.split(',').to_list()[0]
+  selected_variable_means = read_sql.loc[read_sql['equation_name']==equation_name]['xs_mean'].str.split(',').to_list()[0]
+  selected_variable_maxs = read_sql.loc[read_sql['equation_name']==equation_name]['xs_max'].str.split(',').to_list()[0]
+  selected_variable_mins = read_sql.loc[read_sql['equation_name']==equation_name]['xs_min'].str.split(',').to_list()[0]
 
   key_stats = []
   for v in selected_variables:
@@ -936,9 +936,9 @@ def variable_optimizer(chosen_variable, equation_name, objective):
     value_means.append(selected_variable_means[m])
     value_maxs.append(selected_variable_maxs[m])
     value_mins.append(selected_variable_mins[m])
-  value_means.append(table.loc[table['equation_name']==equation_name]['y_mean'].values.tolist()[0])
-  value_maxs.append(table.loc[table['equation_name']==equation_name]['y_max'].values.tolist()[0])
-  value_mins.append(table.loc[table['equation_name']==equation_name]['y_min'].values.tolist()[0])
+  value_means.append(read_sql.loc[read_sql['equation_name']==equation_name]['y_mean'].values.tolist()[0])
+  value_maxs.append(read_sql.loc[read_sql['equation_name']==equation_name]['y_max'].values.tolist()[0])
+  value_mins.append(read_sql.loc[read_sql['equation_name']==equation_name]['y_min'].values.tolist()[0])
   value_means = [float(i) for i in value_means]
   value_maxs = [float(i) for i in value_maxs]
   value_mins = [float(i) for i in value_mins]
@@ -961,10 +961,11 @@ def variable_optimizer(chosen_variable, equation_name, objective):
   bnds = tuple(list_of_bnds)
 
 
-  optimize_result = scipy.optimize.minimize(fun=f, x0=initial_condition, bounds=bnds)
+  optimized_result = scipy.optimize.minimize(fun=f, x0=initial_condition, bounds=bnds)
   xs_result = {keys[i]: list(optimized_result.x)[i] for i in range(len(keys))}
-  y_result = optimize_result.fun
+  y_result = optimized_result.fun
 
+  equations_conn.dispose()
 
   return {'xs_result': xs_result, 'y_result': y_result}
 

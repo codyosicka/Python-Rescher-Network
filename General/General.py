@@ -878,14 +878,14 @@ def variable_optimizer(chosen_variable, equation_name, objective):
   #sql = "SELECT * FROM equations_table"
   #read_sql = pd.read_sql(sql, equations_conn)
 
-  selected_eq = table.loc[table['equation_name']==equation_name]['equation'].values.tolist()[0]
-  selected_y = table.loc[table['equation_name']==equation_name]['equation_name'].values.tolist()[0]
+  selected_eq = read_sql.loc[read_sql['equation_name']==equation_name]['equation'].values.tolist()[0]
+  selected_y = read_sql.loc[read_sql['equation_name']==equation_name]['equation_name'].values.tolist()[0]
   full_eq = selected_eq + ' - ' + selected_y # for sympy the equation must be in the form: 0 = x0 * x1 +...+ - y
   full_expression = sympy.parsing.sympy_parser.parse_expr(full_eq)
   sympy_variables = list(map(str, list(full_expression.free_symbols)))
   sympy_variables_for_eq = ','.join(sympy_variables)
   var(sympy_variables, real=True)
-  selected_variables = table.loc[table['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
+  selected_variables = read_sql.loc[read_sql['equation_name']==equation_name]['x_variables'].str.split(",").to_list()[0]
   selected_var_index = selected_variables.index(chosen_variable)
   selected_var_x = 'X' + str(selected_var_index)
   target_equation = str(solve(full_eq, selected_var_x)[0]) # here the chosen_variable is now on the left side of the eqn

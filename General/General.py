@@ -1,6 +1,8 @@
 import pandas as pd
 import io
 import os
+import collections
+from collections import Iterable
 
 import gplearn
 from gplearn.genetic import SymbolicRegressor
@@ -249,7 +251,6 @@ def uploadto_equations_database(result_df):
 def complete_structures():
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
@@ -349,6 +350,7 @@ def complete_structures():
       l = rest
 
   transform1 = out # each number still represents the index of an equation from equations_database
+  transform1 = list(filter(None, transform1))
 
 
   structures_ys = []
@@ -367,32 +369,43 @@ def complete_structures():
   # preping the structures_dict to look like the 1s and 0s representation of structures
 
   structures_dict = {}
-  col_list = []
+  col_list_dict = {}
   for match in range(len(transform1)):
+    col_list_dict[match] = []
     for eq in range(len(transform1[match])):
       structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=transform1[match])
       structures_dict[match] = pd.DataFrame(dict([ (k,pd.Series(v)) for k,v in all_variables_dict.items() ])).transpose().drop(index=structures_dict[match].index).dropna(axis='columns', how='all')
       structures_dict[match].index = list(range(len(transform1[match])))
-      col_list.append(structures_dict[match].loc[eq].dropna().values.tolist())
+      col_list_dict[match].append(structures_dict[match].loc[eq].dropna().values.tolist())
       eq+=1
     match+=1
+
+
+  # Create a flatten function for each list of lists in col_list_dict
+  def flatten(l):
+    for el in l:
+      if isinstance(el, Iterable) and not isinstance(el, (str, bytes)):
+        yield from flatten(el)
+      else:
+        yield el
+  col_list_dict = {k: list(set(flatten(v))) for k, v in col_list_dict.items()} # flatten the lists and remove duplicates
+
   
-  col_list = [item for sublist in col_list for item in sublist] # flatten the list
-  col_list = list(set(col_list)) # remove duplicates
   for match in range(len(transform1)):
-    if len(col_list) > len(structures_dict[match].columns):
-      for newcol in range(len(col_list) - len(structures_dict[match].columns)):
+    if len(col_list_dict[match]) > len(structures_dict[match].columns):
+      for newcol in range(len(col_list_dict[match]) - len(structures_dict[match].columns)):
         structures_dict[match]["newcol{}".format(newcol)] = np.nan
         newcol+=1
-      structures_dict[match].columns = col_list
+      structures_dict[match].columns = col_list_dict[match]
       structures_dict[match] = structures_dict[match].loc[:, ~structures_dict[match].columns.duplicated()]
-    match+=1
+    structures_dict[match].columns = col_list_dict[match]
 
-  check_list = []
+  check_list_dict = {}
   for key in range(len(structures_dict)):
+    check_list_dict[key] = []
     for index in range(len(structures_dict[key])):
-      check_list.append(structures_dict[key].columns.isin(structures_dict[key].loc[index].values.tolist()) * 1.0)
-      structures_dict[key].loc[index] = check_list[index]
+      check_list_dict[key].append(structures_dict[key].columns.isin(structures_dict[key].loc[index].values.tolist()) * 1.0)
+      structures_dict[key].loc[index] = check_list_dict[key][index]
       index+=1
     key+=1
 

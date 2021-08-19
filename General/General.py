@@ -231,8 +231,8 @@ def uploadto_equations_database(result_df):
     new_score = result_df['score'][0]
 
     if new_score > previous_score:
-      #print(new_score > previous_score)
-      result_df.to_sql('equations_table', equations_conn, if_exists='replace', index=False)
+      equations_conn.execute("DELETE FROM equations_table WHERE equation_name='{}'".format(result_df['equation_name'][0]))
+      result_df.to_sql('equations_table', equations_conn, if_exists='append', index=False)
     else:
       pass
 

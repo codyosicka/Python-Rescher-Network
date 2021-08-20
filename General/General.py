@@ -763,9 +763,11 @@ def build_causal_network():
 # the simulator needs the User to choose an equation and input the values for its component variables and choose a target variable
 # then, the simulator needs to create static values for the affected equations to simulate the effects of the User inputs and assumptions on the target variable
 def simulator(equation_name, variable_values, target_variable): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
+
+# Rule: the simulator cannot work the causal logic backwards. If User plugs in a value for a variable that does not affect anything or does not causally affect
+# their target_variable, then Web App must throw an error
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
-
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 

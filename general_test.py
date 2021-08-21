@@ -31,6 +31,8 @@ General.nx.draw_planar(graph,
                 arrows=True, with_labels=True)
 General.plt.show()
 
+print(General.simulator(0,0,0))
+
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #x = General.complete_structures()

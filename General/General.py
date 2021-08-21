@@ -762,32 +762,39 @@ def build_causal_network():
 
 # the simulator needs the User to choose an equation and input the values for its component variables and choose a target variable
 # then, the simulator needs to create static values for the affected equations to simulate the effects of the User inputs and assumptions on the target variable
-def simulator(equation_name, variable_values, target_variable): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
+def simulator(variable_name, variable_value, target_variable): # User chooses equation_name from menu and inputs variable_values (will be a dictionary on my end)
 
-# Rule: the simulator cannot work the causal logic backwards. If User plugs in a value for a variable that does not affect anything or does not causally affect
-# their target_variable, then Web App must throw an error
+  # Rule: the simulator cannot work the causal logic backwards. If User plugs in a value for a variable that does not affect anything or does not causally affect
+  # their target_variable, then Web App must throw an error
   
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
-  whole_graph = nx.read_gexf('G_causal_network.gexf')
+  whole_graph = nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
   node_connections = whole_graph.adj
 
-  for node in range(len(node_connections)):
-    pass
+  selected_connection = node_connections[variable_name]
+
+  # AI takes equation_name chosen by the User and finds all of the connections to that variable_name through the node_connections dictionary
+  # until it gets to the target_variable
+  # ex: variable_name = Temperature Outside (K), AI finds Ideal Gas Constant connected to (caused by) Temperature Outside (K), and nothing caused by the Ideal Gas Constant
+  # may be able to use sympy solve, and subs to plug variable_value into equations and solve for some other equations and substitute them into other equations as necessary
+
+  #for node in range(len(node_connections)):
+    #pass
 
 
   #x_str = 'X2/0.5*X10+2*X9-X1'
   #x_exp = parse_expr(x_str)
-  #x_v = list(x_exp.free_symbols) 
+  #x_v = list(x_exp.free_symbols)
   #print(x_exp)
   #print(x_v)
   #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
 
   equations_conn.dispose()
 
-  return
+  return node_connections
 
 
 

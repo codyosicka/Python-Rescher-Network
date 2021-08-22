@@ -772,9 +772,9 @@ def simulator(variable_name, variable_value, target_variable): # User chooses eq
   read_sql = pd.read_sql(sql, equations_conn)
 
   whole_graph = nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
-  node_connections = whole_graph.adj
+  node_connections = whole_graph.edges
 
-  selected_connection = node_connections[variable_name]
+  #selected_connection = node_connections[variable_name]
 
   # AI takes equation_name chosen by the User and finds all of the connections to that variable_name through the node_connections dictionary
   # until it gets to the target_variable

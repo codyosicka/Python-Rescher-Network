@@ -774,27 +774,147 @@ def simulator(variable_name, variable_value, target_variable): # User chooses eq
   whole_graph = nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
   node_connections = whole_graph.edges
 
-  #selected_connection = node_connections[variable_name]
+  first_connections = []
+  first_connections_tups = []
+  for tup in node_connections:
+    if variable_name in tup[0]:
+      first_connections_tups.append(tup)
+      first_connections.append(tup[1])
 
-  # AI takes equation_name chosen by the User and finds all of the connections to that variable_name through the node_connections dictionary
-  # until it gets to the target_variable
-  # ex: variable_name = Temperature Outside (K), AI finds Ideal Gas Constant connected to (caused by) Temperature Outside (K), and nothing caused by the Ideal Gas Constant
-  # may be able to use sympy solve, and subs to plug variable_value into equations and solve for some other equations and substitute them into other equations as necessary
+  
+  def find_connections(connections_list):
+    selected_connections = []
+    selected_connections_tups = []
+    for c in connections_list:
+      for tup in node_connections:
+        if c in tup[0]:
+          selected_connections.append(tup[1])
+          selected_connections_tups.append(tup)
 
-  #for node in range(len(node_connections)):
-    #pass
+    return selected_connections, selected_connections_tups
 
 
-  #x_str = 'X2/0.5*X10+2*X9-X1'
-  #x_exp = parse_expr(x_str)
-  #x_v = list(x_exp.free_symbols)
-  #print(x_exp)
-  #print(x_v)
-  #print(x_exp.subs({x_v[0]: 1, x_v[1]: 1, x_v[2]: 1, x_v[3]: 1}))
+  connections_dict = {}
+  connections_dict_tups = {}
+  connections_dict[0] = first_connections
+  connections_dict_tups[0] = first_connections_tups
+  connections_series = pd.Series(connections_dict)
+  connections_series_tups = pd.Series(connections_dict_tups)
+
+  i = len(node_connections)-1
+  while i > 0:
+    for j in range(len(connections_series)):
+      if target_variable not in connections_series[j]:
+        connections_series[j+1] = find_connections(connections_series[j])[0]
+        connections_series_tups[j+1] = find_connections(connections_series[j])[1]
+      else:
+        break
+      i-=1
+
+  # Note, in the case of 'a', the algorithm will search both connection clusters connected to 'a' until it finds the target variable on either side
+  # The algorithm does not know ahead of time which path to search
+
+  for i in range(len(connections_series_tups)):
+    connections_series_tups[i] = [' '.join(ts) for ts in connections_series_tups[i]]
+    connections_series_tups[i] = [' '.join(connections_series_tups[i])]
+    connections_series_tups[i] = list(set(connections_series_tups[i][0].split(' ')))
+
+
+  variables_needed = [variable_name]
+  for i in range(len(connections_series)):
+    for j in connections_series[i]:
+      variables_needed.append(j)
+  variables_needed = list(set(variables_needed))
+
+  # Create separate dataframe from the database dataframe in order to perform necessary operations and transformations
+  eq_var_df = pd.DataFrame()
+  eq_var_df['equation_name'] = read_sql['equation_name']
+  eq_var_df['equation'] = read_sql['equation']
+  eq_var_df['x_variables'] = read_sql['x_variables']
+
+  # remove the equations (rows of dataframe) that do not have the variables in variables_needed
+  for i in range(len(eq_var_df.index)):
+    if set(eq_var_df['x_variables'][i]) & set(variables_needed):
+      pass
+    else:
+      eq_var_df = eq_var_df.drop(i, axis=0)
+
+
+  for i in range(len(read_sql)):
+    eq_var_df['x_variables'][i] = read_sql['x_variables'][i].split(',')
+  eq_var_df = eq_var_df.reset_index().drop(columns=['index'])
+  eq_var_df['real_equation'] = sympify(eq_var_df['equation'])
+  eq_var_df['symbols'] = eq_var_df['real_equation'].apply(lambda x: list(x.free_symbols))
+  eq_var_df['symbols'] = eq_var_df['symbols'].apply(lambda x: list(map(str, x)))
+  for i in range(len(eq_var_df['symbols'].index)):
+    for j in range(len(eq_var_df['symbols'][i])):
+      eq_var_df['symbols'][i][j] = eq_var_df['symbols'][i][j].replace('X','')
+  eq_var_df['symbols'] = eq_var_df['symbols'].apply(lambda x: list(set(map(int, x))))
+  eq_var_df['sorted'] = eq_var_df['symbols'].apply(lambda x: list(map(str, x)))
+  eq_var_df['new_symbols'] = [list() for x in range(len(eq_var_df.index))]
+  eq_var_df['to_subs'] = [list() for x in range(len(eq_var_df.index))]
+  for i in range(len(eq_var_df['sorted'])):
+    eq_var_df['sorted'][i] = ['X'+l for l in eq_var_df['sorted'][i]]
+    for j in range(len(eq_var_df['symbols'][i])):
+      eq_var_df['new_symbols'][i].append(eq_var_df['x_variables'][i][eq_var_df['symbols'][i][j]])
+      sympy.var(','.join(eq_var_df['new_symbols'][i]))
+      eq_var_df['to_subs'][i].append((eq_var_df['sorted'][i][j], eq_var_df['new_symbols'][i][j]))
+  for eq in range(len(eq_var_df['real_equation'])):
+    eq_var_df['real_equation'][eq] = eq_var_df['real_equation'][eq].subs(eq_var_df['to_subs'][eq])
+    if len(eq_var_df['symbols'][eq]) > 1:
+      eq_var_df['real_equation'][eq] = str(eq_var_df['real_equation'][eq]) + '-' + eq_var_df['equation_name'][eq]
+  eq_var_df['real_equation'] = sympify(eq_var_df['real_equation'])
+  eq_var_df['full_symbols'] = eq_var_df['new_symbols']
+  for i in range(len(eq_var_df.index)):
+    if len(eq_var_df['symbols'][i]) > 1:
+      eq_var_df['full_symbols'][i] = eq_var_df['full_symbols'][i] + [eq_var_df['equation_name'][i]]
+  eq_var_df['y_mean'] = read_sql['y_mean'].astype(float)
+
+  knowns_dict = {}
+  for i in range(len(eq_var_df.index)):
+    knowns_dict['{}'.format(eq_var_df['equation_name'][i])] = eq_var_df['y_mean'][i]
+  knowns_dict['{}'.format(variable_name)] = variable_value
+  knowns_items = knowns_dict.items()
+  knowns_list = list(knowns_items)
+
+  solving_df = pd.DataFrame()
+  solving_df['real_equation'] = eq_var_df['real_equation']
+  solving_df['full_symbols'] = eq_var_df['full_symbols']
+  solving_df['knowns_plugged_in'] = solving_df['real_equation']
+  for i in range(len(solving_df.index)):
+    if (len(solving_df['full_symbols'][i]) == 1 and variable_name in solving_df['full_symbols'][i]) or len(solving_df['full_symbols'][i]) == 0:
+      solving_df = solving_df.drop(i, axis=0) # this is to make sure that we do not end with 0 = some number not 0 contradiction which would screw up the final result
+  solving_df = solving_df.reset_index(drop=True)
+  for i in range(len(solving_df.index)):
+    solving_df['knowns_plugged_in'][i] = solving_df['knowns_plugged_in'][i].subs(knowns_list)
+
+  for k in knowns_dict.keys():
+    if k in variables_needed:
+      variables_needed.remove(k)
+  variables_needed = tuple(variables_needed)
+  variables_needed_str = ','.join(variables_needed)
+  sympy.var(variables_needed_str)
+
+  equations_to_solve = []
+  for i in range(len(solving_df.index)):
+    equations_to_solve.append(solving_df['knowns_plugged_in'][i])
+  equations_to_solve = tuple(equations_to_solve)
+
+  solution = sympy.solve(equations_to_solve, variables_needed)[0]
+  final_solution = {variables_needed[i]: solution[i] for i in range(len(solution))}
+
+  #try:
+    #solution = sympy.solve(equations_to_solve, variables_needed)[0] # if there is a max or min to solve for, replace them with piecewise
+    #print("solution: ", solution)
+    #final_solution = {variables_needed[i]: solution[i] for i in range(len(solution))}
+    #print("final solution: ", final_solution)
+  #except:
+    #print("There was in Error in solving for {}".format(target_variable))
+
 
   equations_conn.dispose()
 
-  return node_connections
+  return final_solution
 
 
 

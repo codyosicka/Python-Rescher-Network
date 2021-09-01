@@ -605,6 +605,10 @@ def static_causal_order(original_df):
 # Initialize mini network:
 def initialize_mini_network(original_df, sco, name_of_network): # name_of_network is string, # sco is the result from static_causal_order function
   
+  #if len(os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks')) > 0:
+    #for file in os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks'):
+      #os.remove(file) 
+
   for i in range(len(sco)):
     for j in range(len(sco[i])):
       if i > 0:
@@ -777,7 +781,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   first_connections = []
   first_connections_tups = []
   for tup in node_connections:
-    if variable_name in tup[0]:
+    if variable_name == tup[0]:
       first_connections_tups.append(tup)
       first_connections.append(tup[1])
 
@@ -860,7 +864,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
     eq_var_df['sorted'][i] = ['X'+l for l in eq_var_df['sorted'][i]]
     for j in range(len(eq_var_df['symbols'][i])):
       eq_var_df['new_symbols'][i].append(eq_var_df['x_variables'][i][eq_var_df['symbols'][i][j]])
-      sympy.var(','.join(eq_var_df['new_symbols'][i]))
+      sp.var(','.join(eq_var_df['new_symbols'][i]))
       eq_var_df['to_subs'][i].append((eq_var_df['sorted'][i][j], eq_var_df['new_symbols'][i][j]))
   for eq in range(len(eq_var_df['real_equation'])):
     eq_var_df['real_equation'][eq] = eq_var_df['real_equation'][eq].subs(eq_var_df['to_subs'][eq])
@@ -908,14 +912,14 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
 
   variables_needed = tuple(variables_needed)
   variables_needed_str = ','.join(variables_needed)
-  sympy.var(variables_needed_str)
+  sp.var(variables_needed_str)
 
   equations_to_solve = []
   for i in range(len(solving_df.index)):
     equations_to_solve.append(solving_df['knowns_plugged_in'][i])
   equations_to_solve = tuple(equations_to_solve)
 
-  final_solution = sympy.solve(equations_to_solve, variables_needed, dict=True)[0]
+  final_solution = sp.solve(equations_to_solve, variables_needed, dict=True)[0]
 
   #try:
     #solution = sympy.solve(equations_to_solve, variables_needed)[0] # if there is a max or min to solve for, replace them with piecewise

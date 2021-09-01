@@ -801,15 +801,18 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   connections_series = pd.Series(connections_dict)
   connections_series_tups = pd.Series(connections_dict_tups)
 
-  i = len(node_connections)-1
-  while i > 0:
-    for j in range(len(connections_series)):
-      if target_variable not in connections_series[j]:
-        connections_series[j+1] = find_connections(connections_series[j])[0]
-        connections_series_tups[j+1] = find_connections(connections_series[j])[1]
-      else:
-        break
-      i-=1
+  if target_variable in first_connections:
+    pass
+  else:
+    i = len(node_connections)-1
+    while i > 0:
+      for j in range(len(connections_series)):
+        if target_variable not in connections_series[j]:
+          connections_series[j+1] = find_connections(connections_series[j])[0]
+          connections_series_tups[j+1] = find_connections(connections_series[j])[1]
+        else:
+          break
+        i-=1
 
   # Note, in the case of 'a', the algorithm will search both connection clusters connected to 'a' until it finds the target variable on either side
   # The algorithm does not know ahead of time which path to search
@@ -831,6 +834,8 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   eq_var_df['equation_name'] = read_sql['equation_name']
   eq_var_df['equation'] = read_sql['equation']
   eq_var_df['x_variables'] = read_sql['x_variables']
+  for i in range(len(read_sql)):
+    eq_var_df['x_variables'][i] = read_sql['x_variables'][i].split(',')
 
   # remove the equations (rows of dataframe) that do not have the variables in variables_needed
   for i in range(len(eq_var_df.index)):
@@ -840,9 +845,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
       eq_var_df = eq_var_df.drop(i, axis=0)
 
 
-  for i in range(len(read_sql)):
-    eq_var_df['x_variables'][i] = read_sql['x_variables'][i].split(',')
-  eq_var_df = eq_var_df.reset_index().drop(columns=['index'])
+  eq_var_df = eq_var_df.reset_index(drop=True)
   eq_var_df['real_equation'] = sympify(eq_var_df['equation'])
   eq_var_df['symbols'] = eq_var_df['real_equation'].apply(lambda x: list(x.free_symbols))
   eq_var_df['symbols'] = eq_var_df['symbols'].apply(lambda x: list(map(str, x)))
@@ -885,12 +888,24 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
     if (len(solving_df['full_symbols'][i]) == 1 and variable_name in solving_df['full_symbols'][i]) or len(solving_df['full_symbols'][i]) == 0:
       solving_df = solving_df.drop(i, axis=0) # this is to make sure that we do not end with 0 = some number not 0 contradiction which would screw up the final result
   solving_df = solving_df.reset_index(drop=True)
+  solving_df['knowns_symbols'] = [list() for x in range(len(solving_df.index))]
   for i in range(len(solving_df.index)):
     solving_df['knowns_plugged_in'][i] = solving_df['knowns_plugged_in'][i].subs(knowns_list)
+    solving_df['knowns_symbols'][i] = list(solving_df['knowns_plugged_in'][i].free_symbols) # each element in each list is in the type of sympy.core.symbol
+  solving_df['knowns_symbols'] = solving_df['knowns_symbols'].apply(lambda x: list(map(str, x)))
 
   for k in knowns_dict.keys():
     if k in variables_needed:
       variables_needed.remove(k)
+  # if free symbols from each equaiton of solving_df['knowns_plugged_in'] is not in variables_needed, then add them to variables_needed
+  knowns_symbols_list = [x for x in solving_df['knowns_symbols']]
+  knowns_symbols_list = list(set([item for sub in knowns_symbols_list for item in sub]))
+  kset = set(knowns_symbols_list)
+  vset = set(variables_needed)
+  if len(kset.difference(vset)) > 0:
+    for i in kset.difference(vset):
+      variables_needed.append(i)
+
   variables_needed = tuple(variables_needed)
   variables_needed_str = ','.join(variables_needed)
   sympy.var(variables_needed_str)
@@ -900,8 +915,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
     equations_to_solve.append(solving_df['knowns_plugged_in'][i])
   equations_to_solve = tuple(equations_to_solve)
 
-  solution = sympy.solve(equations_to_solve, variables_needed)[0]
-  final_solution = {variables_needed[i]: solution[i] for i in range(len(solution))}
+  final_solution = sympy.solve(equations_to_solve, variables_needed, dict=True)[0]
 
   #try:
     #solution = sympy.solve(equations_to_solve, variables_needed)[0] # if there is a max or min to solve for, replace them with piecewise

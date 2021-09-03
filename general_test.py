@@ -20,18 +20,18 @@ General.pd.set_option('display.max_rows', None)
 
 #--------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-#graph = General.nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
+graph = General.nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
 
-#print(graph.adj)
-#print(len(graph.adj))
+print(graph.adj)
+print(len(graph.adj))
 
-#General.plt.figure(1)
-#General.nx.draw_planar(graph,
-#                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
-#                arrows=True, with_labels=True)
-#General.plt.show()
+General.plt.figure(1)
+General.nx.draw_planar(graph,
+                node_color='red', # draw planar means the nodes and edges are drawn such that not edges cross
+                arrows=True, with_labels=True)
+General.plt.show()
 
-print(len(General.os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks')))
+#print(len(General.os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks')))
 #for file in General.os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks'):
 #    print(file)
 
@@ -51,3 +51,5 @@ print(len(General.os.listdir('C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks
 General.plt.figure(1)
 General.nx.draw_planar(graph1, node_color='red', arrows=True, with_labels=True)
 General.plt.show()'''
+
+#print(General.variable_simulator(variable_name="Weight_on_Piston_N", variable_value=500, target_variable="Ideal_Gas_Constant"))

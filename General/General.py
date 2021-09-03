@@ -221,7 +221,6 @@ def uploadto_equations_database(result_df):
   equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
   #equations_conn.execute("CREATE TABLE IF NOT EXISTS equations_table (eq_id int, equation_name text, equation text, score real, x_variables text)")
 
-  #sql = "SELECT * FROM equations_table"
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
@@ -648,8 +647,8 @@ def initialize_mini_network(original_df, sco, name_of_network): # name_of_networ
   for key in range(len(final_dict)):
     G_causal_variables.add_edges_from(final_dict[key]) # from file for large graphs
 
-  #nx.write_gexf(G_causal_variables, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\initialized_causal_network_{}.gexf".format(name_of_network))
-  nx.write_gexf(G_causal_variables, "C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks\\initialized_causal_network_{}.gexf".format(name_of_network))
+  nx.write_gexf(G_causal_variables, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\initialized_causal_network_{}.gexf".format(name_of_network))
+  #nx.write_gexf(G_causal_variables, "C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks\\initialized_causal_network_{}.gexf".format(name_of_network))
 
   return G_causal_variables
 
@@ -702,8 +701,8 @@ def modify_mini_network(original_df, sco, previous_causal_network, name_of_netwo
   for key in range(len(final_dict)):
     G_causal_variables_new.add_edges_from(final_dict[key]) # from file for large graphs
 
-  #nx.write_gexf(G_causal_variables_new, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\modified_causal_network_{}.gexf".format(name_of_network))
-  nx.write_gexf(G_causal_variables_new, "C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks\\modified_causal_network_{}.gexf".format(name_of_network))
+  nx.write_gexf(G_causal_variables_new, "C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks\\modified_causal_network_{}.gexf".format(name_of_network))
+  #nx.write_gexf(G_causal_variables_new, "C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks\\modified_causal_network_{}.gexf".format(name_of_network))
 
 
   return G_causal_variables_new
@@ -748,8 +747,8 @@ def build_causal_network():
   G_causal_network.add_nodes_from(causal_network_nodes_list)
   G_causal_network.add_edges_from(causal_network_edges_list)
 
-  #nx.write_gexf(G_causal_network, "C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf")
-  nx.write_gexf(G_causal_network, "C:\\Users\\Buff14\\Desktop\\Web App\\G_causal_network.gexf")
+  nx.write_gexf(G_causal_network, "C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf")
+  #nx.write_gexf(G_causal_network, "C:\\Users\\Buff14\\Desktop\\Web App\\G_causal_network.gexf")
 
 
   return G_causal_network
@@ -777,8 +776,8 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
-  #whole_graph = nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
-  whole_graph = nx.read_gexf('C:\\Users\\Buff14\\Desktop\\Web App\\G_causal_network.gexf')
+  whole_graph = nx.read_gexf('C:\\Users\\Xaos\\Desktop\\Web App\\G_causal_network.gexf')
+  #whole_graph = nx.read_gexf('C:\\Users\\Buff14\\Desktop\\Web App\\G_causal_network.gexf')
   node_connections = whole_graph.edges
 
   first_connections = []

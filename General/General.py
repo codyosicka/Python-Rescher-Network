@@ -877,6 +877,10 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   for i in range(len(eq_var_df.index)):
     if len(eq_var_df['symbols'][i]) > 1:
       eq_var_df['full_symbols'][i] = eq_var_df['full_symbols'][i] + [eq_var_df['equation_name'][i]]
+  # need to corret the y_mean column
+  eq_var_df['y_mean'] = [list() for x in range(len(eq_var_df.index))]
+  for yi in range(len(eq_var_df['y_mean'])):
+    eq_var_df['y_mean'][yi] = read_sql['y_mean'][read_sql['y_mean'][read_sql['equation_name']==eq_var_df['equation_name'][yi]].index.values[0]]
   eq_var_df['y_mean'] = read_sql['y_mean'].astype(float)
 
   knowns_dict = {}
@@ -921,7 +925,24 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
     equations_to_solve.append(solving_df['knowns_plugged_in'][i])
   equations_to_solve = tuple(equations_to_solve)
 
+  # only_xs is created and used to make sure that the final_solution does not contain any variables
+  only_xs = pd.DataFrame()
+  only_xs['x_variables'] = read_sql['x_variables'].apply(lambda x: x.split(","))
+  only_xs['xs_mean'] = read_sql['xs_mean'].apply(lambda x: x.split(","))
+  only_xs['xs_mean'] = only_xs['xs_mean'].apply(lambda x: list(map(float, x)))
+  only_xs['mapped'] = [dict() for d in range(len(only_xs.index))]
+  for i in range(len(only_xs.index)):
+    for j in range(len(only_xs['x_variables'][i])):
+      only_xs['mapped'][i][only_xs['x_variables'][i][j]] = only_xs['xs_mean'][i][j]
+  only_xs_dict = {}
+  for i in range(len(only_xs.index)):
+    only_xs_dict.update(only_xs['mapped'][i])
+
+
   final_solution = sp.solve(equations_to_solve, variables_needed, dict=True)[0]
+  if len(final_solution[eval('{}'.format(target_variable))].free_symbols) > 0:
+    for s in final_solution:
+      final_solution[s] = final_solution[s].subs(only_xs_dict)
 
   #try:
     #solution = sympy.solve(equations_to_solve, variables_needed)[0] # if there is a max or min to solve for, replace them with piecewise

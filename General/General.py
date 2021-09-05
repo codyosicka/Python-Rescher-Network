@@ -881,7 +881,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   eq_var_df['y_mean'] = [list() for x in range(len(eq_var_df.index))]
   for yi in range(len(eq_var_df['y_mean'])):
     eq_var_df['y_mean'][yi] = read_sql['y_mean'][read_sql['y_mean'][read_sql['equation_name']==eq_var_df['equation_name'][yi]].index.values[0]]
-  eq_var_df['y_mean'] = read_sql['y_mean'].astype(float)
+  eq_var_df['y_mean'] = eq_var_df['y_mean'].astype(float)
 
   knowns_dict = {}
   for i in range(len(eq_var_df.index)):

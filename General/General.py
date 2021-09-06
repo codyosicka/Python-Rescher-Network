@@ -714,8 +714,8 @@ def modify_mini_network(original_df, sco, previous_causal_network, name_of_netwo
 
 def build_causal_network():
   
-  #folder_path = r'C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks'
-  folder_path = r'C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks'
+  folder_path = r'C:\\Users\\Xaos\\Desktop\\Web App\\causal_networks'
+  #folder_path = r'C:\\Users\\Buff14\\Desktop\\Web App\\causal_networks'
 
 
   def listDir(dir):

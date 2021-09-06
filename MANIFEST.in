@@ -1,3 +1,0 @@
-include README
-include G_causal_network
-recursive-include causal_networks_folder/ *

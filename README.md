@@ -1,1 +1,3 @@
-# Python-General
+# Python Rescher Network
+
+Inspired by 

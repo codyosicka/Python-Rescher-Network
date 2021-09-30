@@ -217,8 +217,8 @@ def gp_symbolic_regression(data, y_variable):
 
 def uploadto_equations_database(result_df):
 
-  #equations_conn = create_engine("mysql+pymysql://root:Help181320!@localhost/equations_database")
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  #equations_conn = create_engine()
+  equations_conn = create_engine()
   #equations_conn.execute("CREATE TABLE IF NOT EXISTS equations_table (eq_id int, equation_name text, equation text, score real, x_variables text)")
 
   sql = "SELECT * FROM equations_table"
@@ -249,7 +249,7 @@ def uploadto_equations_database(result_df):
 # Define complete structures:
 def complete_structures():
   
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  equations_conn = create_engine()
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
@@ -772,7 +772,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
   # Rule: the simulator cannot work the causal logic backwards. If User plugs in a value for a variable that does not affect anything or does not causally affect
   # their target_variable, then Web App must throw an error
   
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  equations_conn = create_engine()
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
@@ -966,7 +966,7 @@ def variable_simulator(variable_name, variable_value, target_variable): # User c
  
 def self_optimizer(equation_name, objective):
 
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  equations_conn = create_engine()
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
@@ -1057,7 +1057,7 @@ def self_optimizer(equation_name, objective):
 
 def variable_optimizer(chosen_variable, equation_name, objective):
 
-  equations_conn = create_engine("mysql+pymysql://unwp2wrnzt46hqsp:b95S8mvE5t3CQCFoM3ci@bh10avqiwijwc8nzbszc-mysql.services.clever-cloud.com/bh10avqiwijwc8nzbszc")
+  equations_conn = create_engine()
   sql = "SELECT * FROM equations_table"
   read_sql = pd.read_sql(sql, equations_conn)
 
